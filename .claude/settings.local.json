@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(npx shadcn@latest init --defaults)",
+      "Bash(npx shadcn@latest add button card input label badge accordion progress dialog sheet tabs skeleton --yes)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(awk '{print $NF}')",
+      "Bash(grep -v \"^$\")",
+      "Bash(gh auth *)",
+      "Bash(git -C /Users/romanoliakh/Documents/Projects/lms status)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
+    ]
+  }
+}

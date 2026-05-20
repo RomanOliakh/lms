@@ -1,0 +1,216 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Map CSS variables to Tailwind utilities */
+@theme inline {
+  /* shadcn semantic tokens */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  /* LMS neutral scale */
+  --color-n-0: var(--n-0);
+  --color-n-50: var(--n-50);
+  --color-n-100: var(--n-100);
+  --color-n-150: var(--n-150);
+  --color-n-200: var(--n-200);
+  --color-n-300: var(--n-300);
+  --color-n-400: var(--n-400);
+  --color-n-500: var(--n-500);
+  --color-n-700: var(--n-700);
+  --color-n-900: var(--n-900);
+  --color-n-950: var(--n-950);
+
+  /* LMS accent — Indigo */
+  --color-lms-accent: var(--a-500);
+  --color-lms-accent-50: var(--a-50);
+  --color-lms-accent-100: var(--a-100);
+  --color-lms-accent-600: var(--a-600);
+  --color-lms-accent-700: var(--a-700);
+
+  /* LMS semantic colors */
+  --color-success: var(--success);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --color-locked: var(--locked);
+
+  /* Border radii — LMS scale overrides shadcn defaults */
+  --radius-xs: var(--r-xs);
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-xl);
+
+  /* Box shadows */
+  --shadow-1: var(--sh-1);
+  --shadow-2: var(--sh-2);
+  --shadow-pop: var(--sh-pop);
+
+  /* Font families */
+  --font-family-sans: var(--font-sans), system-ui, sans-serif;
+  --font-family-mono: var(--font-mono), monospace;
+}
+
+/* ─── Design tokens ─── */
+:root {
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+
+  /* LMS neutral scale */
+  --n-0:   oklch(99.2% 0.003 80);
+  --n-50:  oklch(97.8% 0.004 80);
+  --n-100: oklch(95.5% 0.005 80);
+  --n-150: oklch(92.5% 0.006 80);
+  --n-200: oklch(88%   0.007 80);
+  --n-300: oklch(78%   0.008 80);
+  --n-400: oklch(62%   0.009 80);
+  --n-500: oklch(48%   0.010 80);
+  --n-700: oklch(32%   0.012 80);
+  --n-900: oklch(18%   0.010 80);
+  --n-950: oklch(12%   0.008 80);
+
+  /* LMS accent — Indigo */
+  --a-50:  oklch(96%  0.025 255);
+  --a-100: oklch(92%  0.05  255);
+  --a-500: oklch(62%  0.18  255);
+  --a-600: oklch(55%  0.19  255);
+  --a-700: oklch(47%  0.18  255);
+
+  /* LMS semantic */
+  --success: oklch(62% 0.13 155);
+  --warn:    oklch(72% 0.15 75);
+  --danger:  oklch(60% 0.19 25);
+  --locked:  oklch(55% 0.005 80);
+
+  /* LMS radii */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+
+  /* LMS shadows */
+  --sh-1:   0 1px 2px oklch(15% 0.01 80 / 0.04);
+  --sh-2:   0 4px 12px oklch(15% 0.01 80 / 0.06);
+  --sh-pop: 0 12px 40px oklch(15% 0.01 80 / 0.12);
+
+  /* LMS layout constants */
+  --sidebar-w: 304px;
+  --sidebar-w-narrow: 72px;
+  --header-h: 56px;
+  --content-max: 820px;
+
+  /* shadcn tokens — wired to LMS palette */
+  --background: var(--n-0);
+  --foreground: var(--n-700);
+  --card: var(--n-100);
+  --card-foreground: var(--n-900);
+  --popover: var(--n-0);
+  --popover-foreground: var(--n-900);
+  --primary: var(--a-500);
+  --primary-foreground: oklch(100% 0 0);
+  --secondary: var(--n-100);
+  --secondary-foreground: var(--n-900);
+  --muted: var(--n-50);
+  --muted-foreground: var(--n-400);
+  --accent: var(--n-100);
+  --accent-foreground: var(--n-900);
+  --destructive: var(--danger);
+  --border: var(--n-200);
+  --input: var(--n-200);
+  --ring: var(--a-500);
+  --radius: 0.625rem;
+  --chart-1: var(--a-500);
+  --chart-2: var(--success);
+  --chart-3: var(--warn);
+  --chart-4: var(--n-400);
+  --chart-5: var(--n-300);
+  --sidebar: var(--n-50);
+  --sidebar-foreground: var(--n-700);
+  --sidebar-primary: var(--a-500);
+  --sidebar-primary-foreground: oklch(100% 0 0);
+  --sidebar-accent: var(--n-100);
+  --sidebar-accent-foreground: var(--n-900);
+  --sidebar-border: var(--n-200);
+  --sidebar-ring: var(--a-500);
+}
+
+.dark {
+  --n-0:   oklch(14% 0.006 80);
+  --n-50:  oklch(17% 0.006 80);
+  --n-100: oklch(20% 0.007 80);
+  --n-150: oklch(24% 0.007 80);
+  --n-200: oklch(28% 0.008 80);
+  --n-300: oklch(36% 0.008 80);
+  --n-400: oklch(52% 0.008 80);
+  --n-500: oklch(65% 0.008 80);
+  --n-700: oklch(82% 0.006 80);
+  --n-900: oklch(94% 0.004 80);
+  --n-950: oklch(98% 0.003 80);
+}
+
+/* ─── Base styles ─── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    @apply border-border outline-ring/50;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5 {
+    color: var(--n-900);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; cursor: pointer; }
+  input, textarea, select { font: inherit; }
+}
