@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 @AGENTS.md
 
 # LMS Project
@@ -14,6 +18,35 @@
 - **Resend** — transactional email
 - **lucide-react** — icons
 - **clsx** + **tailwind-merge** — use via `lib/utils.ts` `cn()`
+
+## Commands
+
+```bash
+npm run dev        # start dev server (Turbopack, default port 3000)
+npm run dev -- -p 3001  # alternate port if 3000 is taken
+npm run build      # production build — also type-checks (no separate tsc step)
+npm run lint       # ESLint
+```
+
+No test runner is configured — `npm test` will fail.
+
+Regenerate Supabase types after schema changes:
+```bash
+supabase gen types typescript --linked > types/supabase.ts
+```
+
+## Request flow
+
+```
+Browser request
+  → proxy.ts         (auth guard: unauthenticated → /login, authed → /dashboard)
+  → App Router       (route groups: (auth), (student), (admin))
+  → Server Component (default) or Client Component ("use client")
+  → lib/supabase/server.ts (Server) or lib/supabase/client.ts (Client)
+  → Supabase (DB + Auth + Storage)
+```
+
+shadcn/ui components are installed via `npx shadcn@latest add <name>` (style: base-nova, Tailwind v4 aware). Never edit `components/ui/` by hand.
 
 ## Folder structure
 
@@ -86,3 +119,33 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - Server Components are the default; add `"use client"` only where interactivity is needed.
 - Route handlers live in `app/api/**/route.ts`.
 - Supabase server client uses `cookies()` from `next/headers` — always `await` it in Next.js 16.
+
+## Git conventions
+- After EVERY completed task or file change — run git add -A and git commit automatically, without asking
+- Use conventional commits: feat: fix: refactor: chore: docs:
+- Branch naming: feat/* fix/* chore/*
+- Never push to main directly, never push without explicit approval
+
+## MVP scope
+
+### Included
+- Email/password auth — roles: student, admin
+- Course catalog, module → lesson hierarchy
+- Video lessons (Bunny.net) + watch_time progress
+- Text lessons (MDX) + PDF materials (Supabase Storage)
+- Single/multiple choice quizzes — server-side validation only
+- Stripe one-time checkout + enrollment
+- Student dashboard + admin content panel
+
+### Excluded — do not suggest these
+- Instructor role, certificates, comments, analytics
+- Stripe subscriptions, discount codes, mobile app, AI features
+
+## Security rules
+- quiz_options.is_correct — NEVER send to client, check server-side only
+- Bunny.net signed URLs expire in 24h — generate per-request
+- RLS enforced: students see only their own enrollments and progress
+- proxy.ts handles all route protection (Next.js 16 replaces middleware.ts with proxy.ts) — never trust client-side checks
+
+## Current sprint
+Sprint 2 🔄 — admin panel: CRUD courses, modules, lessons, quiz builder
