@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, Trash2 } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Separator } from "@/components/ui/separator";
 import CourseForm from "@/components/course/CourseForm";
 import CurriculumEditor from "@/components/course/CurriculumEditor";
-import { deleteCourse } from "@/lib/actions/courses";
+import DeleteCourseButton from "@/components/course/DeleteCourseButton";
 
 export default async function EditCoursePage({
   params,
@@ -30,11 +30,6 @@ export default async function EditCoursePage({
     .order("position")
     .order("position", { referencedTable: "lessons" });
 
-  async function handleDelete() {
-    "use server";
-    await deleteCourse(id);
-  }
-
   return (
     <div className="p-8 max-w-2xl">
       <div className="flex items-center justify-between mb-6">
@@ -45,18 +40,7 @@ export default async function EditCoursePage({
           <ChevronLeft className="w-4 h-4" />
           Назад до курсів
         </Link>
-        <form action={handleDelete}>
-          <button
-            type="submit"
-            className="inline-flex items-center gap-1.5 text-sm text-n-400 hover:text-danger transition-colors"
-            onClick={(e) => {
-              if (!confirm("Видалити курс?")) e.preventDefault();
-            }}
-          >
-            <Trash2 className="w-4 h-4" />
-            Видалити курс
-          </button>
-        </form>
+        <DeleteCourseButton courseId={id} />
       </div>
 
       <h1 className="text-xl font-semibold text-n-900 tracking-tight mb-6">{course.title}</h1>

@@ -147,5 +147,93 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - RLS enforced: students see only their own enrollments and progress
 - proxy.ts handles all route protection (Next.js 16 replaces middleware.ts with proxy.ts) — never trust client-side checks
 
+## Completed sprints
+
+### Sprint 1 ✅ — Auth
+- Login / signup pages (`app/(auth)/`)
+- `proxy.ts` route protection + admin role check (queries `profiles.role`)
+- Supabase server/browser clients (`lib/supabase/server.ts`, `client.ts`)
+- `/auth/confirm` route handler for email verification
+
+### Sprint 2 ✅ — Admin panel
+- DB schema applied to Supabase project `jokaufikrghrkxcdtpbl` (eu-central-1):
+  `profiles` (with auto-create trigger) → `courses` → `modules` → `lessons` → `quiz_questions` → `quiz_options`
+- `types/supabase.ts` generated
+- Admin shell: `app/(admin)/layout.tsx` + `components/layout/AdminSidebar.tsx`
+- Course CRUD: list, create, edit, delete — Server Actions in `lib/actions/courses.ts`
+- `components/course/CurriculumEditor.tsx` — modules/lessons accordion, inline add/rename/delete/↑↓
+- `components/lesson/LessonForm.tsx` — text (MDX) / video (Bunny.net) types
+- `components/quiz/QuizBuilder.tsx` — questions + options, correct answer toggle
+- Server Actions: `lib/actions/modules.ts`, `lib/actions/lessons.ts`, `lib/actions/quiz.ts`
+- Student dashboard placeholder (`app/(student)/dashboard/page.tsx`)
+
+### Known gotchas fixed
+- `redirect()` inside Server Action + client `try/catch` — action returns `{ id }`, client does `router.push()`
+- `Button asChild` not supported in this shadcn version — use `<Link className="...">` directly
+- RLS on `profiles` needs `FOR SELECT TO authenticated USING (auth.uid() = id)` (not `FOR ALL`) for proxy to read role
+- Event handlers in Server Component props — extract to a separate `"use client"` component (e.g. `DeleteCourseButton`)
+- Base UI "uncontrolled FieldControl" warning — always use controlled state (`value` + `onChange`), never `defaultValue`
+- `useRouter()` must be called inside the component body, not just imported
+
+### Post-sprint 2 fixes applied
+- `components/lesson/LessonForm.tsx` — rewritten to fully controlled state
+- `components/course/DeleteCourseButton.tsx` — new client component for delete with confirm
+- `components/course/CourseForm.tsx` — added `const router = useRouter()` inside component
+- `lib/actions/courses.ts` — `createCourse` returns `{ id }` instead of calling `redirect()`
+- `proxy.ts` — uses `.maybeSingle()` instead of `.single()` for profile query
+- `.gitignore` — added `.claude/settings.local.json`
+
 ## Current sprint
-Sprint 2 🔄 — admin panel: CRUD courses, modules, lessons, quiz builder
+Sprint 3 🔄 — student-facing: course catalog, enrollment (Stripe), lesson player, progress tracking
+
+### Last stopped
+Admin panel (Sprint 2) is fully working: create/edit/delete courses, manage modules+lessons, quiz builder.
+Notion status page: https://www.notion.so/366fbb2a781f81ff929ae0472e66fb08
+
+### Next tasks
+1. `enrollments` + `progress` tables in Supabase (via MCP)
+2. Public course catalog (`app/courses/`) — list + single course landing page
+3. Stripe one-time checkout (`app/api/checkout/route.ts`) + webhook (`app/api/webhooks/stripe/`)
+4. Lesson player (`app/(student)/learn/[slug]/`) — video iframe + MDX render
+5. Progress tracking — `app/api/progress/route.ts` + watch_time updates
+
+## Verification checklist
+
+After every sprint or significant change, verify the following manually in the browser.
+Update this list when new features are added — mark done items ✅, broken items ❌.
+
+### Sprint 1 — Auth
+- ✅ `/signup` — реєстрація (email + пароль)
+- ✅ Email підтвердження → `/auth/confirm` → редірект на `/dashboard`
+- ✅ `/login` — вхід існуючого юзера
+- ✅ Неавторизований запит → редірект на `/login`
+- ✅ Після логіну → редірект на `/dashboard`
+
+### Sprint 2 — Admin panel
+- ✅ Юзер без ролі `admin` → `/admin/*` редіректить на `/dashboard`
+- ✅ Юзер з роллю `admin` → вільно заходить у `/admin/*`
+- ✅ Sidebar: email юзера + кнопка виходу → `signOut` → `/login`
+- ✅ `/admin/courses` — список курсів (порожній стан + таблиця)
+- ✅ Створення курсу → з'являється в списку, редірект на `/admin/courses/[id]`
+- ✅ Редагування курсу (title, description, price, thumbnail, is_published)
+- ✅ Видалення курсу → confirm → видаляє → `/admin/courses`
+- ✅ Додати модуль → з'являється в акордеоні
+- ✅ Перейменувати модуль inline
+- ✅ Видалити модуль
+- ✅ Кнопки ↑↓ для порядку модулів
+- ✅ Додати урок у модуль
+- ✅ "Edit" уроку → `/admin/courses/[id]/lessons/[lessonId]`
+- ✅ Видалити урок / кнопки ↑↓
+- ✅ Lesson form: type=text → MDX поле; type=video → URL поле
+- ✅ "Зберегти урок" → "Збережено ✓" без перезавантаження
+- ✅ Quiz builder: додати питання → додати варіанти → позначити правильний → видалити
+- ✅ `npm run build` — без помилок
+
+### Sprint 3 — Student-facing (not yet verified)
+- [ ] Public `/courses` — список опублікованих курсів
+- [ ] `/courses/[slug]` — лендінг курсу + кнопка купити
+- [ ] Stripe checkout → оплата → enrollment створюється
+- [ ] Stripe webhook → підтверджує enrollment
+- [ ] `/learn/[slug]` — lesson player (video iframe або MDX)
+- [ ] Прогрес watch_time зберігається через `POST /api/progress`
+- [ ] Student dashboard — список enrolled курсів + прогрес

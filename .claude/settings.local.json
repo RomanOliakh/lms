@@ -12,7 +12,13 @@
       "Bash(git -C /Users/romanoliakh/Documents/Projects/lms status)",
       "Bash(git init *)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(gh project *)",
+      "Bash(gh api graphql -f 'query= *)",
+      "mcp__supabase__get_project_url",
+      "mcp__supabase__get_publishable_keys",
+      "mcp__supabase__list_organizations",
+      "mcp__supabase__get_cost"
     ]
   }
 }
