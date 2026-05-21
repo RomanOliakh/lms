@@ -21,6 +21,7 @@ function slugify(text: string): string {
 }
 
 export default function CourseForm({ course }: { course?: Course }) {
+  const router = useRouter();
   const [title, setTitle] = useState(course?.title ?? "");
   const [slug, setSlug] = useState(course?.slug ?? "");
   const [slugEdited, setSlugEdited] = useState(!!course);
