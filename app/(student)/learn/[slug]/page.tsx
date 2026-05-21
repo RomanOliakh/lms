@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import LessonPlayer from "@/components/lesson/LessonPlayer";
+import QuizTaker from "@/components/quiz/QuizTaker";
 
 export default async function LearnPage({
   params,
@@ -58,6 +59,23 @@ export default async function LearnPage({
     .eq("lesson_id", lesson.id)
     .maybeSingle();
 
+  // Fetch quiz questions WITHOUT is_correct (never expose to client)
+  const { data: quizQuestions } = await supabase
+    .from("quiz_questions")
+    .select("id, question, type, position, quiz_options(id, text, position)")
+    .eq("lesson_id", lesson.id)
+    .order("position")
+    .order("position", { referencedTable: "quiz_options" });
+
+  const questions = (quizQuestions ?? []).map((q) => ({
+    id: q.id,
+    question: q.question,
+    type: q.type,
+    options: ((q.quiz_options as { id: string; text: string; position: number }[]) ?? []).map(
+      (o) => ({ id: o.id, text: o.text })
+    ),
+  }));
+
   return (
     <div className="min-h-screen bg-n-0">
       <div className="max-w-3xl mx-auto px-6 py-10">
@@ -78,6 +96,8 @@ export default async function LearnPage({
           content={lesson.content}
           initialCompleted={progress?.completed ?? false}
         />
+
+        <QuizTaker lessonId={lesson.id} questions={questions} />
 
         <div className="flex items-center justify-between mt-8 pt-6 border-t border-n-200">
           {prevLesson ? (
