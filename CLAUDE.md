@@ -183,19 +183,36 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - `proxy.ts` — uses `.maybeSingle()` instead of `.single()` for profile query
 - `.gitignore` — added `.claude/settings.local.json`
 
-## Current sprint
-Sprint 3 🔄 — student-facing: course catalog, enrollment (Stripe), lesson player, progress tracking
+## Completed sprints (continued)
 
-### Last stopped
-Admin panel (Sprint 2) is fully working: create/edit/delete courses, manage modules+lessons, quiz builder.
+### Sprint 3 ✅ — Student-facing
+- `enrollments` + `lesson_progress` tables + RLS in Supabase
+- Public course catalog: `app/courses/page.tsx` (grid of published courses)
+- Course landing page: `app/courses/[slug]/page.tsx` — modules outline, price, EnrollButton
+- `app/(student)/layout.tsx` + `components/layout/StudentHeader.tsx` — top nav (Каталог, Мої курси, вийти)
+- `app/page.tsx` redirects to `/courses`
+- `api/checkout`: free courses → direct enrollment; paid courses → Stripe Checkout session
+- `api/webhooks/stripe`: verifies signature, handles `checkout.session.completed`, creates enrollment via service role
+- `EnrollButton`: handles both free (direct) and paid (Stripe redirect) flows; `?enrolled=true` param post-payment
+- Lesson player: `app/(student)/learn/[slug]/` — video iframe (16:9) + text/MDX; prev/next navigation
+- `LessonPlayer` — "Позначити як завершений" button → `POST /api/progress`
+- `QuizTaker` — single/multiple choice, server-side validation via `api/quiz/submit`, retry support
+- Student dashboard: enrolled courses list, progress bar, "Продовжити →" → first unfinished lesson
+- `npm run build` — no errors
+
+### Known gotchas — Sprint 3
+- Stripe env vars must be filled in `.env.local`; `NEXT_PUBLIC_APP_URL` must match dev port (3001)
+- For local Stripe webhook testing: `stripe listen --forward-to localhost:3001/api/webhooks/stripe`
+- `?enrolled=true` after Stripe redirect is optimistic — webhook may not have fired yet; page re-renders normally on next visit
+- `quiz_options.is_correct` is readable via anon key (RLS can't restrict columns) — server never selects it for client queries
+
+## Current sprint
+Sprint 3 ✅ — done. All student-facing features implemented and build passing.
 Notion status page: https://www.notion.so/366fbb2a781f81ff929ae0472e66fb08
 
 ### Next tasks
-1. `enrollments` + `progress` tables in Supabase (via MCP)
-2. Public course catalog (`app/courses/`) — list + single course landing page
-3. Stripe one-time checkout (`app/api/checkout/route.ts`) + webhook (`app/api/webhooks/stripe/`)
-4. Lesson player (`app/(student)/learn/[slug]/`) — video iframe + MDX render
-5. Progress tracking — `app/api/progress/route.ts` + watch_time updates
+- Verify Sprint 3 manually in browser (see checklist below)
+- Sprint 4 candidates: PDF materials upload, Bunny.net signed video URLs, Resend email on enrollment
 
 ## Verification checklist
 
@@ -229,11 +246,25 @@ Update this list when new features are added — mark done items ✅, broken ite
 - ✅ Quiz builder: додати питання → додати варіанти → позначити правильний → видалити
 - ✅ `npm run build` — без помилок
 
-### Sprint 3 — Student-facing (not yet verified)
-- [ ] Public `/courses` — список опублікованих курсів
-- [ ] `/courses/[slug]` — лендінг курсу + кнопка купити
-- [ ] Stripe checkout → оплата → enrollment створюється
-- [ ] Stripe webhook → підтверджує enrollment
-- [ ] `/learn/[slug]` — lesson player (video iframe або MDX)
-- [ ] Прогрес watch_time зберігається через `POST /api/progress`
-- [ ] Student dashboard — список enrolled курсів + прогрес
+### Sprint 3 — Student-facing (потрібно перевірити в браузері)
+- [ ] `/` → редірект на `/courses`
+- [ ] `/courses` — список опублікованих курсів (grid карток)
+- [ ] `/courses/[slug]` — лендінг: обкладинка, опис, ціна, програма курсу
+- [ ] Незалогінений → кнопка "Увійти, щоб записатись" → `/login`
+- [ ] Залогінений, не записаний, безкоштовний курс → "Записатись" → enrollment → редірект на перший урок
+- [ ] Залогінений, не записаний, платний курс → "Записатись" → редірект на Stripe Checkout
+- [ ] Stripe успішна оплата → `?enrolled=true` → "Продовжити навчання →"
+- [ ] Stripe webhook → enrollment створюється в БД
+- [ ] Залогінений, вже записаний → "Продовжити навчання →" → `/learn/[firstLessonSlug]`
+- [ ] Незаписаний → `/learn/[slug]` → редірект на `/courses/[slug]`
+- [ ] `/learn/[slug]` — відображення video уроку (iframe 16:9)
+- [ ] `/learn/[slug]` — відображення text уроку (MDX/текст)
+- [ ] "Позначити як завершений" → зберігається в `lesson_progress`, кнопка змінює стан
+- [ ] Навігація ← Попередній / Наступний → між уроками
+- [ ] Квіз: вибір варіанту → "Перевірити відповіді" → результат (правильно/неправильно)
+- [ ] Квіз: "Спробувати ще раз" → скидає стан
+- [ ] StudentHeader: посилання Каталог / Мої курси; кнопка Вийти → `/login`
+- [ ] `/dashboard` — список enrolled курсів з прогрес-барами
+- [ ] `/dashboard` — "Продовжити →" веде на перший незавершений урок
+- [ ] `/dashboard` — 100% → кнопка "Переглянути"
+- [ ] `npm run build` — без помилок
