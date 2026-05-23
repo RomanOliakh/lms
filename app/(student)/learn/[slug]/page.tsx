@@ -77,8 +77,7 @@ export default async function LearnPage({
   }));
 
   return (
-    <div className="min-h-screen bg-n-0">
-      <div className="max-w-3xl mx-auto px-6 py-10">
+    <div className="max-w-3xl mx-auto px-6 py-10">
         <Link
           href={`/courses/${courseSlug}`}
           className="inline-flex items-center gap-1 text-sm text-n-500 hover:text-n-900 mb-6"
@@ -123,7 +122,6 @@ export default async function LearnPage({
             <div />
           )}
         </div>
-      </div>
     </div>
   );
 }

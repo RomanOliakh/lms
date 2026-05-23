@@ -6,10 +6,13 @@ import EnrollButton from "@/components/course/EnrollButton";
 
 export default async function CourseSlugPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ enrolled?: string }>;
 }) {
   const { slug } = await params;
+  const { enrolled: enrolledParam } = await searchParams;
   const supabase = await createClient();
 
   const { data: course } = await supabase
@@ -40,7 +43,7 @@ export default async function CourseSlugPage({
       .eq("user_id", user.id)
       .eq("course_id", course.id)
       .maybeSingle();
-    isEnrolled = !!enrollment;
+    isEnrolled = !!enrollment || enrolledParam === "true";
   }
 
   const allLessons = (modules ?? []).flatMap((m) => m.lessons ?? []);

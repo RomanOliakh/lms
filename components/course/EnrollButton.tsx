@@ -58,11 +58,20 @@ export default function EnrollButton({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ course_id: courseId }),
         });
+        const data = await res.json();
+
         if (!res.ok) {
-          const data = await res.json();
           setError(data.error ?? "Помилка запису");
           return;
         }
+
+        // Paid course — redirect to Stripe checkout
+        if (data.url) {
+          window.location.href = data.url;
+          return;
+        }
+
+        // Free course — enrolled directly
         setEnrolled(true);
         if (firstLessonSlug) {
           router.push(`/learn/${firstLessonSlug}`);
