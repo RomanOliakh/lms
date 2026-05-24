@@ -10,23 +10,43 @@ import { Tables } from "@/types/supabase";
 
 type Lesson = Tables<"lessons">;
 
-export default function LessonForm({
-  lesson,
-  courseId,
-}: {
-  lesson: Lesson;
-  courseId: string;
-}) {
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export default function LessonForm({ lesson, courseId }: { lesson: Lesson; courseId: string }) {
+  const [title, setTitle] = useState(lesson.title);
+  const [slug, setSlug] = useState(lesson.slug);
+  const [slugEdited, setSlugEdited] = useState(true);
   const [type, setType] = useState(lesson.type);
+  const [content, setContent] = useState(lesson.content ?? "");
+  const [videoUrl, setVideoUrl] = useState(lesson.video_url ?? "");
+  const [duration, setDuration] = useState(String(lesson.duration ?? ""));
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  function handleTitleChange(value: string) {
+    setTitle(value);
+    if (!slugEdited) setSlug(slugify(value));
+  }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
     setSaved(false);
-    const formData = new FormData(e.currentTarget);
+    const formData = new FormData();
+    formData.set("title", title);
+    formData.set("slug", slug);
+    formData.set("type", type);
+    formData.set("content", content);
+    formData.set("video_url", videoUrl);
+    formData.set("duration", duration);
 
     startTransition(async () => {
       try {
@@ -45,8 +65,8 @@ export default function LessonForm({
         <Label htmlFor="title" className="text-n-700">Назва</Label>
         <Input
           id="title"
-          name="title"
-          defaultValue={lesson.title}
+          value={title}
+          onChange={(e) => handleTitleChange(e.target.value)}
           required
           className="border-n-200 focus-visible:ring-lms-accent"
         />
@@ -56,8 +76,8 @@ export default function LessonForm({
         <Label htmlFor="slug" className="text-n-700">Slug</Label>
         <Input
           id="slug"
-          name="slug"
-          defaultValue={lesson.slug}
+          value={slug}
+          onChange={(e) => { setSlug(e.target.value); setSlugEdited(true); }}
           required
           className="border-n-200 focus-visible:ring-lms-accent font-mono text-sm"
         />
@@ -67,7 +87,6 @@ export default function LessonForm({
         <Label htmlFor="type" className="text-n-700">Тип уроку</Label>
         <select
           id="type"
-          name="type"
           value={type}
           onChange={(e) => setType(e.target.value)}
           className="w-full border border-n-200 rounded-sm px-3 py-2 text-sm bg-n-0 text-n-900 focus:outline-none focus:ring-1 focus:ring-lms-accent"
@@ -82,10 +101,10 @@ export default function LessonForm({
           <Label htmlFor="content" className="text-n-700">Контент (MDX)</Label>
           <Textarea
             id="content"
-            name="content"
-            defaultValue={lesson.content ?? ""}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
             rows={8}
-            placeholder="## Заголовок&#10;&#10;Текст уроку..."
+            placeholder={"## Заголовок\n\nТекст уроку..."}
             className="border-n-200 focus-visible:ring-lms-accent font-mono text-sm resize-y"
           />
         </div>
@@ -94,8 +113,8 @@ export default function LessonForm({
           <Label htmlFor="video_url" className="text-n-700">URL відео (Bunny.net)</Label>
           <Input
             id="video_url"
-            name="video_url"
-            defaultValue={lesson.video_url ?? ""}
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
             placeholder="https://iframe.mediadelivery.net/embed/..."
             className="border-n-200 focus-visible:ring-lms-accent"
           />
@@ -106,10 +125,10 @@ export default function LessonForm({
         <Label htmlFor="duration" className="text-n-700">Тривалість (секунди)</Label>
         <Input
           id="duration"
-          name="duration"
           type="number"
           min="0"
-          defaultValue={lesson.duration ?? ""}
+          value={duration}
+          onChange={(e) => setDuration(e.target.value)}
           placeholder="600"
           className="border-n-200 focus-visible:ring-lms-accent"
         />
