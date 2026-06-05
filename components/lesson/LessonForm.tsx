@@ -6,18 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { updateLesson } from "@/lib/actions/lessons";
+import { slugify } from "@/lib/utils";
 import { Tables } from "@/types/supabase";
 
 type Lesson = Tables<"lessons">;
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 export default function LessonForm({ lesson, courseId }: { lesson: Lesson; courseId: string }) {
   const [title, setTitle] = useState(lesson.title);
