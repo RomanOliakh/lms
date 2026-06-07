@@ -7,9 +7,14 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   experimental: {
-    // Cap build worker count so `next build` doesn't saturate all 16 cores
-    // and freeze the machine. Leaves headroom for the OS / editor.
-    cpus: 4,
+    // Cap the number of static-generation workers `next build` spawns.
+    // Each worker is a full Node process that loads the whole app, so this
+    // value is the main memory multiplier during the "Generating static
+    // pages" phase. On this 16 GB Intel Mac, 4 still let the build + VS Code
+    // + browser push the system into swap-thrash and a watchdog kernel panic,
+    // so we drop to 2. Any value other than the default (= logical CPU count)
+    // is honoured verbatim by Next. Lower to 1 if panics persist.
+    cpus: 2,
   },
 };
 
