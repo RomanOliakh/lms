@@ -207,13 +207,13 @@ NEXT_PUBLIC_APP_URL=http://localhost:3001
 - `quiz_options.is_correct` is readable via anon key (RLS can't restrict columns) — server never selects it for client queries
 
 ## Current sprint
-Sprint 3 ✅ — done. All student-facing features implemented and build passing.
-Dev environment fully configured: `.env.local` has all Supabase + Stripe keys set. Dev server runs on port 3001.
+Sprint 3 ✅ — done and **manually verified in browser 2026-06-07** (see checklist below). All student-facing features implemented and build passing.
+Dev environment fully configured: `.env.local` has all Supabase + Stripe keys set. Dev server runs on port 3001. Supabase Site URL set to :3001. Stripe account business name set ("LMS Test", test mode).
 Notion status page: https://www.notion.so/366fbb2a781f81ff929ae0472e66fb08
 
 ### Next tasks
-- Verify Sprint 3 manually in browser (see checklist below)
-- Sprint 4 candidates: PDF materials upload, Bunny.net signed video URLs, Resend email on enrollment
+- Sprint 4 candidates: **Bunny.net signed video URLs** (video currently 403), PDF materials upload, Resend email on enrollment
+- Investigate QuizBuilder: confirm it can save question `type=multiple` (all current quiz questions are `single`)
 
 ## Verification checklist
 
@@ -309,35 +309,37 @@ Update this list when new features are added — mark done items ✅, broken ite
 
 - [✅]  `npm run build` — без TypeScript помилок і без ESLint errors
 
-### Sprint 3 — Student (перевірити в браузері)
+### Sprint 3 — Student (верифіковано 2026-06-07 у браузері + код/HTTP/БД)
 
-- [ ]  `/` → автоматичний редірект на `/courses`
-- [ ]  `/courses` — список published курсів (grid карток); empty state якщо немає
-- [ ]  `/courses/[slug]` — назва, опис, ціна, програма (модулі → уроки)
-- [ ]  StudentHeader відображається на `/dashboard` і `/learn/*`: посилання Каталог / Мої курси / Вийти
-- [ ]  Кнопка Вийти в хедері → signOut → `/login`
-- [ ]  Незалогінений → кнопка "Увійти, щоб записатись" → `/login`
-- [ ]  Залогінений, **безкоштовний** курс → "Записатись" → enrollment → redirect на перший урок
-- [ ]  Залогінений, **платний** курс → "Записатись" → redirect на Stripe Checkout
-- [ ]  Stripe успішна оплата → `?enrolled=true` → кнопка "Продовжити навчання →"
-- [ ]  Stripe webhook → enrollment створюється в БД (перевірити через Supabase dashboard)
-- [ ]  Повторний запис — не дублікат (idempotent)
-- [ ]  `/learn/[slug]` без enrollment → redirect на `/courses/[slug]`
-- [ ]  `/learn/[slug]`, type=video → iframe 16:9
-- [ ]  `/learn/[slug]`, type=text → текстовий контент
-- [ ]  Навігація ← Попередній / Наступний → між уроками
-- [ ]  "Позначити як завершений" → "Урок завершено" (кнопка змінює стан + зберігається)
-- [ ]  `/dashboard` — enrolled курси з progress bar (%); empty state якщо немає
-- [ ]  `/dashboard` → "Продовжити →" веде на **перший незавершений** урок (не на сторінку курсу)
-- [ ]  `/dashboard` при 100% → кнопка "Переглянути"
-- [ ]  Після завершення уроку → % оновлюється на dashboard після перезавантаження
+- [✅]  `/` → автоматичний редірект на `/courses`
+- [✅]  `/courses` — список published курсів (grid карток) — *empty state не перевіряв (курси є)*
+- [✅]  `/courses/[slug]` — назва, опис, ціна, програма (модулі → уроки); неіснуючий slug → 404
+- [✅]  StudentHeader відображається на `/dashboard` і `/learn/*`: Каталог / Мої курси / Вийти
+- [✅]  Кнопка Вийти в хедері → signOut → `/login`
+- [✅]  Незалогінений → кнопка "Увійти, щоб записатись" → `/login` — *код (EnrollButton)*
+- [✅]  Залогінений, **безкоштовний** курс → enrollment → redirect на перший урок — *код + спільний шлях із платним; наживо не ганяв, щоб не стирати enrollment*
+- [✅]  Залогінений, **платний** курс → "Записатись" → redirect на Stripe Checkout (`cs_test_`)
+- [✅]  Stripe успішна оплата (4242) → `?enrolled=true` → кнопка "Продовжити навчання →"
+- [✅]  Stripe webhook → enrollment створюється в БД (`checkout.session.completed`→200, рядок створено)
+- [✅]  Повторний запис — не дублікат — *код: early-return + 23505 + UNIQUE(user_id,course_id)*
+- [✅]  `/learn/[slug]` без enrollment → redirect на `/courses/[slug]`
+- [⚠️]  `/learn/[slug]`, type=video → iframe 16:9 рендериться; **саме відео = 403** (Bunny signed-URL — задача Sprint 4)
+- [✅]  `/learn/[slug]`, type=text → текстовий контент (порожній → "Контент відсутній")
+- [✅]  Навігація ← Попередній / Наступний (перший=лише next; середній=обидва, через межу модуля)
+- [✅]  "Позначити як завершений" → "Урок завершено" (кнопка змінює стан + зберігається)
+- [✅]  `/dashboard` — enrolled курси з progress bar (%)
+- [✅]  `/dashboard` → "Продовжити →" веде на **перший незавершений** урок
+- [✅]  `/dashboard` при 100% → кнопка "Переглянути"
+- [✅]  Після завершення уроку → % оновлюється на dashboard після перезавантаження
 
-### Quiz для студента
+### Quiz для студента (верифіковано 2026-06-07)
 
-- [ ]  Одразу після контенту уроку з'являється секція "Тест" (якщо є питання)
-- [ ]  Single choice — можна обрати тільки один варіант
-- [ ]  Multiple choice — можна обрати кілька варіантів
-- [ ]  "Перевірити" без відповідей → повідомлення
-- [ ]  Після субміту: зелені правильні, червоні неправильні, результат X/Y
-- [ ]  "Спробувати ще раз" з'являється єсли не всі правильні
-- [ ]  `is_correct` ніколи не потрапляє в відповідь клієнту (server-only)
+- [✅]  Одразу після контенту уроку з'являється секція "Тест" (якщо є питання)
+- [✅]  Single choice — можна обрати тільки один варіант
+- [⚠️]  Multiple choice — наживо НЕ перевірено: у БД немає жодного питання `type=multiple` (усі 4 = single). Логіка QuizTaker коректна (код), але візуально індикатор = той самий кружечок, що й single. **TODO: перевірити, чи QuizBuilder зберігає `type=multiple`**
+- [✅]  "Перевірити" без відповідей → "Дайте відповідь на всі питання"
+- [✅]  Після субміту: зелені правильні, червоні неправильні, результат X/Y
+- [✅]  "Спробувати ще раз" з'являється якщо не всі правильні (+ скидає стан)
+- [✅]  `is_correct` ніколи не потрапляє в відповідь клієнту (server-only; lesson page select без is_correct)
+
+> **Інші знахідки верифікації:** `/api/quiz/submit` не перевіряє enrollment і завжди повертає `correct_option_ids`; Stripe Checkout вимагає business name на акаунті (задано "LMS Test" у test-режимі); прямий URL-перехід на `/learn/*` інколи кидає на `/login` через cookie-таймінг (клік по лінку працює).
