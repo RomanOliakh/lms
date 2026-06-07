@@ -40,3 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .claude/settings.local.json
+
+# fetched skill content (keep skills-lock.json tracked for reproducibility)
+.agents/
+.claude/skills/

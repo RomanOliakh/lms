@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { createModule, updateModule, deleteModule, moveModule } from "@/lib/actions/modules";
-import { createLesson, deleteLesson } from "@/lib/actions/lessons";
+import { createLesson, deleteLesson, moveLesson } from "@/lib/actions/lessons";
 import { Tables } from "@/types/supabase";
 
 type Module = Tables<"modules"> & { lessons: Tables<"lessons">[] };
@@ -76,6 +76,12 @@ export default function CurriculumEditor({
     if (!confirm("Видалити урок?")) return;
     startTransition(async () => {
       await deleteLesson(lessonId, courseId);
+    });
+  }
+
+  function handleMoveLesson(lessonId: string, moduleId: string, dir: "up" | "down") {
+    startTransition(async () => {
+      await moveLesson(lessonId, courseId, moduleId, dir);
     });
   }
 
@@ -160,7 +166,7 @@ export default function CurriculumEditor({
 
           {openModules.has(mod.id) && (
             <div className="divide-y divide-n-100">
-              {mod.lessons.map((lesson) => (
+              {mod.lessons.map((lesson, lessonIdx) => (
                 <div
                   key={lesson.id}
                   className="flex items-center gap-3 px-4 py-2.5 hover:bg-n-50"
@@ -174,6 +180,20 @@ export default function CurriculumEditor({
                   )}>
                     {lesson.type === "video" ? "Відео" : "Текст"}
                   </span>
+                  <button
+                    onClick={() => handleMoveLesson(lesson.id, mod.id, "up")}
+                    disabled={lessonIdx === 0 || isPending}
+                    className="p-1 text-n-400 hover:text-n-700 disabled:opacity-30"
+                  >
+                    <ArrowUp className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handleMoveLesson(lesson.id, mod.id, "down")}
+                    disabled={lessonIdx === mod.lessons.length - 1 || isPending}
+                    className="p-1 text-n-400 hover:text-n-700 disabled:opacity-30"
+                  >
+                    <ArrowDown className="w-3.5 h-3.5" />
+                  </button>
                   <Link
                     href={`/admin/courses/${courseId}/lessons/${lesson.id}`}
                     className="p-1 text-n-400 hover:text-lms-accent"

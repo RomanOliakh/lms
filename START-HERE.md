@@ -298,7 +298,7 @@ mkdir -p types
 npm run dev
 ```
 
-Відкрий http://localhost:3000
+Відкрий http://localhost:3001
 
 Якщо бачиш стандартну Next.js сторінку — все працює ✅
 

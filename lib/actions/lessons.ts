@@ -2,15 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
+import { slugify } from "@/lib/utils";
 
 export async function createLesson(moduleId: string, courseId: string, title: string) {
   const supabase = await createClient();
@@ -60,5 +52,37 @@ export async function deleteLesson(id: string, courseId: string) {
   const supabase = await createClient();
   const { error } = await supabase.from("lessons").delete().eq("id", id);
   if (error) throw new Error(error.message);
+  revalidatePath(`/admin/courses/${courseId}`);
+}
+
+export async function moveLesson(
+  id: string,
+  courseId: string,
+  moduleId: string,
+  direction: "up" | "down"
+) {
+  const supabase = await createClient();
+
+  const { data: lessons } = await supabase
+    .from("lessons")
+    .select("id, position")
+    .eq("module_id", moduleId)
+    .order("position");
+
+  if (!lessons) return;
+
+  const idx = lessons.findIndex((l) => l.id === id);
+  const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= lessons.length) return;
+
+  await supabase
+    .from("lessons")
+    .update({ position: lessons[swapIdx].position })
+    .eq("id", lessons[idx].id);
+  await supabase
+    .from("lessons")
+    .update({ position: lessons[idx].position })
+    .eq("id", lessons[swapIdx].id);
+
   revalidatePath(`/admin/courses/${courseId}`);
 }
