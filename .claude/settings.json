@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(lsof -i :3001 -sTCP:LISTEN -n -P)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} redirect:%{redirect_url}\\\\n\" http://localhost:3001/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3001/courses)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3001/login)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} redirect:%{redirect_url}\\\\n\" http://localhost:3001/dashboard)",
+      "Bash(git commit -m 'chore: cap next build to 4 cpus to avoid freezing the machine *)",
+      "Bash(NODE_OPTIONS=--max-old-space-size=4096 taskpolicy -b npm run build)",
+      "Bash(taskpolicy -b npm run dev -- -p 3001)",
+      "Bash(curl -sS -o /dev/null -w \"%{http_code}\\\\n\" --max-time 4 http://localhost:3001/login)"
+    ]
+  }
+}
