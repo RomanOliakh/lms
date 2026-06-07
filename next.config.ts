@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  experimental: {
+    // Cap build worker count so `next build` doesn't saturate all 16 cores
+    // and freeze the machine. Leaves headroom for the OS / editor.
+    cpus: 4,
+  },
 };
 
 export default nextConfig;
