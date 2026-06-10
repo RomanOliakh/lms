@@ -213,7 +213,7 @@ Notion status page: https://www.notion.so/366fbb2a781f81ff929ae0472e66fb08
 
 ### Next tasks
 - Sprint 4 candidates: **Bunny.net signed video URLs** (video currently 403), PDF materials upload, Resend email on enrollment
-- Investigate QuizBuilder: confirm it can save question `type=multiple` (all current quiz questions are `single`)
+- ~~Investigate QuizBuilder `type=multiple`~~ ✅ confirmed working 2026-06-10 (was never a bug; dropdown just wasn't used). Optional polish: student-side multiple indicator is still a circle (cosmetic)
 
 ## Verification checklist
 
@@ -336,7 +336,7 @@ Update this list when new features are added — mark done items ✅, broken ite
 
 - [✅]  Одразу після контенту уроку з'являється секція "Тест" (якщо є питання)
 - [✅]  Single choice — можна обрати тільки один варіант
-- [⚠️]  Multiple choice — наживо НЕ перевірено: у БД немає жодного питання `type=multiple` (усі 4 = single). Логіка QuizTaker коректна (код), але візуально індикатор = той самий кружечок, що й single. **TODO: перевірити, чи QuizBuilder зберігає `type=multiple`**
+- [✅]  Multiple choice — QuizBuilder **коректно зберігає** `type=multiple` (перевірено 2026-06-10: перемкнув питання mnn «Кілька відповідей 3, 4» у дропдауні → у БД одразу `type=multiple`). Усі питання раніше були `single`, бо дропдаун не перемикали при створенні. Логіка QuizTaker для multiple звірена по коду. ⚠️ Косметика: індикатор опції = той самий кружечок, що й single — відрізняє лише підпис «(кілька відповідей)»
 - [✅]  "Перевірити" без відповідей → "Дайте відповідь на всі питання"
 - [✅]  Після субміту: зелені правильні, червоні неправильні, результат X/Y
 - [✅]  "Спробувати ще раз" з'являється якщо не всі правильні (+ скидає стан)
