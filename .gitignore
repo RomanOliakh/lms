@@ -42,5 +42,7 @@ next-env.d.ts
 .claude/settings.local.json
 
 # fetched skill content (keep skills-lock.json tracked for reproducibility)
+# project-authored skills (wrap-up) ARE tracked via the negation below
 .agents/
-.claude/skills/
+.claude/skills/*
+!.claude/skills/wrap-up/
