@@ -125,6 +125,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3001
 - Use conventional commits: feat: fix: refactor: chore: docs:
 - Branch naming: feat/* fix/* chore/*
 - Never push to main directly, never push without explicit approval
+- At the end of every completed chunk of work, run the `/wrap-up` skill (`.claude/skills/wrap-up/`) — it updates CLAUDE.md "Current sprint", syncs GitHub Project #3 card statuses, commits docs, and opens/updates the PR for review
 
 ## Product scope — B2B v1 (minimal sellable)
 
