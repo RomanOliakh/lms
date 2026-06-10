@@ -126,26 +126,41 @@ NEXT_PUBLIC_APP_URL=http://localhost:3001
 - Branch naming: feat/* fix/* chore/*
 - Never push to main directly, never push without explicit approval
 
-## MVP scope
+## Product scope — B2B v1 (minimal sellable)
 
-### Included
-- Email/password auth — roles: student, admin
-- Course catalog, module → lesson hierarchy
-- Video lessons (Bunny.net) + watch_time progress
-- Text lessons (MDX) + PDF materials (Supabase Storage)
-- Single/multiple choice quizzes — server-side validation only
-- Stripe one-time checkout + enrollment
-- Student dashboard + admin content panel
+> **Pivot 2026-06-10:** the product changed category — from a B2C course shop to a **B2B multi-tenant corporate LMS**, built as a partnership. Partner spec: `Learning Platform.xlsx` (50 flows / 30 modules). Open client questions: `docs/discovery-questions.md`. Roadmap: GitHub Project #3 (https://github.com/users/RomanOliakh/projects/3).
+>
+> **Value loop being sold:** company buys access → onboards employees → assigns training → sees who completed what (report + certificate).
 
-### Excluded — do not suggest these
-- Instructor role, certificates, comments, analytics
-- Stripe subscriptions, discount codes, mobile app, AI features
+### IN (v1 — required to sell)
+- Tenancy: `organizations` + `organization_members` + org-scoped RLS (Phase 0 ✅)
+- Roles: **platform_admin / company_admin / learner** only
+- Manual company provisioning by Platform Admin (sales-led; no self-serve signup)
+- Employee invitations by email (Resend) → accept → join company
+- Content engine — **reuse existing**: courses → modules → lessons (Bunny video + MDX text), quizzes (server-validated)
+- Course assignment to employees (all or selected) + optional deadline — no journeys formalism
+- Learner dashboard (assigned courses + progress), player, quiz, mark-complete
+- **Company report: per-employee completion % + quiz scores, CSV export** ← main sellable artifact
+- Simple PDF completion certificate
+
+### OUT (v1) — do not suggest these
+- Self-serve billing/subscriptions (manual invoicing instead), teams/departments
+- Manager and Instructor roles, Programs / Learning Journeys formalism
+- Live workshops, assignments+review, B2C marketplace, public marketing site
+- AI features, SSO/MFA, SCORM, white-label branding, BI/analytics
+
+*(The legacy B2C flow — `enrollments`, `/api/checkout`, public catalog — stays in the codebase, but new features are built for the B2B model.)*
+
+### v1 blockers (credentials needed from the partnership)
+- **Bunny**: Library ID + Token Authentication Key (video is currently 403)
+- **Resend**: `RESEND_API_KEY` + verified sender (invitation emails)
 
 ## Security rules
 - quiz_options.is_correct — NEVER send to client, check server-side only
 - Bunny.net signed URLs expire in 24h — generate per-request
 - RLS enforced: students see only their own enrollments and progress
 - proxy.ts handles all route protection (Next.js 16 replaces middleware.ts with proxy.ts) — never trust client-side checks
+- **Org isolation (B2B):** all org-scoped tables are protected by RLS via `private.*` helper functions (`is_platform_admin()`, `current_user_org_ids()`, `current_user_admin_org_ids()`); cross-org access is forbidden. Helpers live in the non-API-exposed `private` schema so they are NOT callable as PostgREST RPC — keep new helpers there too
 
 ## Completed sprints
 
@@ -206,14 +221,24 @@ NEXT_PUBLIC_APP_URL=http://localhost:3001
 - `?enrolled=true` after Stripe redirect is optimistic — webhook may not have fired yet; page re-renders normally on next visit
 - `quiz_options.is_correct` is readable via anon key (RLS can't restrict columns) — server never selects it for client queries
 
+### Phase 0 ✅ — B2B tenancy foundation (2026-06-10)
+- Tables: `organizations` (name, slug, logo_url, status, **seat_limit**) and `organization_members` (org_id, user_id nullable until invite accepted, org_role [owner|company_admin|manager|instructor|learner], status [invited|active], invited_email; UNIQUE(org_id, user_id))
+- Org-scoped RLS: platform admin = full access; member reads own orgs/row; company_admin manages own org
+- RLS helpers in `private` schema (not exposed as PostgREST RPC) — passes Supabase security advisor
+- Migration tracked in `supabase/migrations/20260610120000_b2b_tenancy_foundation.sql` (applied via MCP)
+- `types/supabase.ts` regenerated; `tsc --noEmit` clean
+- NOT yet done: live RLS isolation test with 2 seeded companies (planned with company provisioning UI)
+
 ## Current sprint
-Sprint 3 ✅ — done and **manually verified in browser 2026-06-07** (see checklist below). All student-facing features implemented and build passing.
-Dev environment fully configured: `.env.local` has all Supabase + Stripe keys set. Dev server runs on port 3001. Supabase Site URL set to :3001. Stripe account business name set ("LMS Test", test mode).
+**B2B pivot in progress** (see Product scope above). Sprints 1–3 (B2C) ✅ done and verified 2026-06-07; Phase 0 (tenancy foundation) ✅ done 2026-06-10 on branch `feat/b2b-tenancy-foundation`.
+Dev environment fully configured: `.env.local` has all Supabase + Stripe keys set. Dev server runs on port 3001. Supabase Site URL set to :3001. Stripe account business name set ("LMS Test", test mode). `BUNNY_*` and `RESEND_API_KEY` are **empty** — v1 blockers.
 Notion status page: https://www.notion.so/366fbb2a781f81ff929ae0472e66fb08
 
 ### Next tasks
-- Sprint 4 candidates: **Bunny.net signed video URLs** (video currently 403), PDF materials upload, Resend email on enrollment
-- ~~Investigate QuizBuilder `type=multiple`~~ ✅ confirmed working 2026-06-10 (was never a bug; dropdown just wasn't used). Optional polish: student-side multiple indicator is still a circle (cosmetic)
+- **Company provisioning UI** — Platform Admin creates company + seat_limit (not blocked, next up)
+- Employee invitations (blocked: Resend key) · Bunny signed video URLs (blocked: Bunny credentials)
+- Awaiting partner answers to `docs/discovery-questions.md` (P0 blocks deeper data-model decisions)
+- Roadmap board: GitHub Project #3 — keep statuses updated as phases land
 
 ## Verification checklist
 
