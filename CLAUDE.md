@@ -238,12 +238,13 @@ NEXT_PUBLIC_APP_URL=http://localhost:3001
 - ~~NOT yet done: browser verification of the UI~~ ✅ verified in browser 2026-06-11: list (seat usage 1/10, 1/5, status badges), create (cyrillic name «Тестова Компанія Ц» → slug `testova-kompaniia-ts`, seat_limit, redirect to edit), edit (rename, suspend → «Призупинена» badge; slug NOT overwritten on rename), delete with confirm → list updated, DB row gone (seeded A/B intact), members table renders real member (email/role/status). seat_limit still informational only (not enforced on insert — enforce when invitations land)
 
 ## Current sprint
-**B2B pivot in progress** (see Product scope above). Sprints 1–3 (B2C) ✅ done and verified 2026-06-07; Phase 0 (tenancy foundation) ✅ 2026-06-10 and company provisioning UI ✅ 2026-06-11, both on branch `feat/b2b-tenancy-foundation` (PR #6).
+**B2B pivot in progress** (see Product scope above). Sprints 1–3 (B2C) ✅ done and verified 2026-06-07. **Phase 0 (tenancy) + company provisioning UI ✅ MERGED to main 2026-06-11** (PR #6: browser-verified, RLS isolation test passed, two code reviews — Claude + CodeRabbit — all findings addressed; follow-up migration `20260611150000` adds membership identity constraints).
+**UI translation to English is in progress** (branch `feat/english-ui`, separate Zed session) — the platform will be English-first with English content. UI strings only; docs stay as-is for now.
 Dev environment fully configured: `.env.local` has all Supabase + Stripe keys set. Dev server runs on port 3001. Supabase Site URL set to :3001. Stripe account business name set ("LMS Test", test mode). `BUNNY_*` and `RESEND_API_KEY` are **empty** — v1 blockers.
 Notion status page: https://www.notion.so/366fbb2a781f81ff929ae0472e66fb08
 
 ### Next tasks
-- ~~Browser verification of `/admin/companies`~~ ✅ done 2026-06-11 (see Phase 0/provisioning notes above)
+- English UI translation — in progress (`feat/english-ui`, Zed)
 - Employee invitations (blocked: Resend key) · Bunny signed video URLs (blocked: Bunny credentials)
 - Enforce `seat_limit` server-side when invitations are built
 - Awaiting partner answers to `docs/discovery-questions.md` (P0 blocks deeper data-model decisions)
