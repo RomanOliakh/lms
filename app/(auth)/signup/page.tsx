@@ -20,12 +20,12 @@ export default function SignupPage() {
     setError("");
 
     if (password !== confirm) {
-      setError("Паролі не співпадають");
+      setError("Passwords do not match");
       return;
     }
 
     if (password.length < 6) {
-      setError("Пароль має бути не менше 6 символів");
+      setError("Password must be at least 6 characters");
       return;
     }
 
@@ -57,18 +57,18 @@ export default function SignupPage() {
             <span className="text-lms-accent text-xl">✓</span>
           </div>
           <h1 className="text-lg font-semibold text-n-900 mb-2">
-            Перевірте email
+            Check your email
           </h1>
           <p className="text-sm text-n-400">
-            Ми надіслали лист підтвердження на{" "}
+            We sent a confirmation email to{" "}
             <span className="text-n-700 font-medium">{email}</span>.
-            Перейдіть за посиланням у листі для активації акаунту.
+            Follow the link in the email to activate your account.
           </p>
           <Link
             href="/login"
             className="mt-6 inline-block text-sm text-lms-accent hover:text-lms-accent-600 font-medium"
           >
-            Повернутись до входу
+            Back to sign in
           </Link>
         </div>
       </div>
@@ -79,8 +79,8 @@ export default function SignupPage() {
     <div className="w-full max-w-sm">
       <div className="bg-n-100 border border-n-200 rounded-md shadow-1 p-8">
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-n-900">Реєстрація</h1>
-          <p className="text-sm text-n-400 mt-1">Створіть свій акаунт</p>
+          <h1 className="text-xl font-semibold text-n-900">Sign up</h1>
+          <p className="text-sm text-n-400 mt-1">Create your account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -102,12 +102,12 @@ export default function SignupPage() {
 
           <div className="space-y-1.5">
             <Label htmlFor="password" className="text-n-700">
-              Пароль
+              Password
             </Label>
             <Input
               id="password"
               type="password"
-              placeholder="Мінімум 6 символів"
+              placeholder="At least 6 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -118,12 +118,12 @@ export default function SignupPage() {
 
           <div className="space-y-1.5">
             <Label htmlFor="confirm" className="text-n-700">
-              Підтвердити пароль
+              Confirm password
             </Label>
             <Input
               id="confirm"
               type="password"
-              placeholder="Повторіть пароль"
+              placeholder="Repeat password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               required
@@ -141,14 +141,14 @@ export default function SignupPage() {
             disabled={loading}
             className="w-full bg-lms-accent hover:bg-lms-accent-600 text-white"
           >
-            {loading ? "Реєстрація..." : "Зареєструватись"}
+            {loading ? "Signing up..." : "Sign up"}
           </Button>
         </form>
 
         <p className="mt-4 text-center text-sm text-n-400">
-          Вже є акаунт?{" "}
+          Already have an account?{" "}
           <Link href="/login" className="text-lms-accent hover:text-lms-accent-600 font-medium">
-            Увійти
+            Sign in
           </Link>
         </p>
       </div>

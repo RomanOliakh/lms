@@ -83,7 +83,7 @@ export default async function LearnPage({
           className="inline-flex items-center gap-1 text-sm text-n-500 hover:text-n-900 mb-6"
         >
           <ChevronLeft className="w-4 h-4" />
-          {courseTitle ?? "Курс"}
+          {courseTitle ?? "Course"}
         </Link>
 
         <h1 className="text-xl font-semibold text-n-900 tracking-tight mb-6">{lesson.title}</h1>

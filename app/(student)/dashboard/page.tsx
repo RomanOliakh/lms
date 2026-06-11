@@ -65,19 +65,19 @@ export default async function DashboardPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
       <div className="mb-8">
-        <h1 className="text-xl font-semibold text-n-900 tracking-tight">Мої курси</h1>
+        <h1 className="text-xl font-semibold text-n-900 tracking-tight">My courses</h1>
         <p className="text-sm text-n-500 mt-0.5">{user?.email}</p>
       </div>
 
       {!enrollments || enrollments.length === 0 ? (
         <div className="text-center py-20 border border-n-200 rounded-md">
           <BookOpen className="w-8 h-8 text-n-300 mx-auto mb-3" />
-          <p className="text-sm text-n-500">Ви ще не записані на жоден курс</p>
+          <p className="text-sm text-n-500">You are not enrolled in any course yet</p>
           <Link
             href="/courses"
             className="mt-4 inline-flex items-center px-4 py-2 rounded-sm bg-lms-accent text-white text-sm font-semibold hover:bg-lms-accent-600 transition-colors"
           >
-            Переглянути каталог
+            Browse catalog
           </Link>
         </div>
       ) : (
@@ -117,13 +117,13 @@ export default async function DashboardPage() {
                     <span className="text-xs text-n-500 flex-shrink-0">{pct}%</span>
                   </div>
                   <p className="text-xs text-n-400 mb-3">
-                    {prog.completed} / {prog.total} уроків завершено
+                    {prog.completed} / {prog.total} lessons completed
                   </p>
                   <Link
                     href={learnHref}
                     className="inline-flex items-center px-3 py-1.5 rounded-sm bg-lms-accent text-white text-xs font-semibold hover:bg-lms-accent-600 transition-colors"
                   >
-                    {pct === 100 ? "Переглянути" : "Продовжити →"}
+                    {pct === 100 ? "Review" : "Continue →"}
                   </Link>
                 </div>
               </div>

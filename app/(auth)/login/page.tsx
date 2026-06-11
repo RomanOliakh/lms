@@ -37,8 +37,8 @@ export default function LoginPage() {
     <div className="w-full max-w-sm">
       <div className="bg-n-100 border border-n-200 rounded-md shadow-1 p-8">
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-n-900">Вхід</h1>
-          <p className="text-sm text-n-400 mt-1">Введіть свої дані для входу</p>
+          <h1 className="text-xl font-semibold text-n-900">Sign in</h1>
+          <p className="text-sm text-n-400 mt-1">Enter your credentials to continue</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -60,7 +60,7 @@ export default function LoginPage() {
 
           <div className="space-y-1.5">
             <Label htmlFor="password" className="text-n-700">
-              Пароль
+              Password
             </Label>
             <Input
               id="password"
@@ -83,14 +83,14 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full bg-lms-accent hover:bg-lms-accent-600 text-white"
           >
-            {loading ? "Вхід..." : "Увійти"}
+            {loading ? "Signing in..." : "Sign in"}
           </Button>
         </form>
 
         <p className="mt-4 text-center text-sm text-n-400">
-          Немає акаунту?{" "}
+          Don&apos;t have an account?{" "}
           <Link href="/signup" className="text-lms-accent hover:text-lms-accent-600 font-medium">
-            Зареєструватись
+            Sign up
           </Link>
         </p>
       </div>
