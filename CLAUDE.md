@@ -228,16 +228,24 @@ NEXT_PUBLIC_APP_URL=http://localhost:3001
 - RLS helpers in `private` schema (not exposed as PostgREST RPC) — passes Supabase security advisor
 - Migration tracked in `supabase/migrations/20260610120000_b2b_tenancy_foundation.sql` (applied via MCP)
 - `types/supabase.ts` regenerated; `tsc --noEmit` clean
-- NOT yet done: live RLS isolation test with 2 seeded companies (planned with company provisioning UI)
+- ~~NOT yet done: live RLS isolation test~~ ✅ done 2026-06-11 (see Company provisioning UI below)
+
+### Company provisioning UI ✅ (2026-06-11)
+- `/admin/companies` CRUD for Platform Admin: list (seat usage, status badge), create/edit form (name, slug auto from name, seat_limit, logo_url, suspend toggle), delete with confirm; read-only members table on the edit page (invites are next phase)
+- Files: `lib/actions/organizations.ts`, `components/company/CompanyForm.tsx` + `DeleteCompanyButton.tsx`, `app/(admin)/admin/companies/{,new/,[id]/}page.tsx`; sidebar item «Компанії»
+- **Live RLS isolation test passed**: 2 seeded companies (`test-co-a`, `test-co-b` — left in DB for browser checks) + 2 student users; company_admin of A sees only A (orgs and members), learner of B sees only B, platform admin sees both, cross-org UPDATE → 0 rows, cross-org INSERT → 42501
+- ⚠️ Testing gotcha: impersonating via `set_config(...)` inside a CTE gives **phantom RLS leaks** — the plan is built while still `postgres` (BYPASSRLS). Test RLS only as separate statements: `begin; set local role authenticated; set local request.jwt.claims = '...'; <query>; rollback;`
+- NOT yet done: browser verification of the UI; seat_limit is informational only (not enforced on insert — enforce when invitations land)
 
 ## Current sprint
-**B2B pivot in progress** (see Product scope above). Sprints 1–3 (B2C) ✅ done and verified 2026-06-07; Phase 0 (tenancy foundation) ✅ done 2026-06-10 on branch `feat/b2b-tenancy-foundation`.
+**B2B pivot in progress** (see Product scope above). Sprints 1–3 (B2C) ✅ done and verified 2026-06-07; Phase 0 (tenancy foundation) ✅ 2026-06-10 and company provisioning UI ✅ 2026-06-11, both on branch `feat/b2b-tenancy-foundation` (PR #6).
 Dev environment fully configured: `.env.local` has all Supabase + Stripe keys set. Dev server runs on port 3001. Supabase Site URL set to :3001. Stripe account business name set ("LMS Test", test mode). `BUNNY_*` and `RESEND_API_KEY` are **empty** — v1 blockers.
 Notion status page: https://www.notion.so/366fbb2a781f81ff929ae0472e66fb08
 
 ### Next tasks
-- **Company provisioning UI** — Platform Admin creates company + seat_limit (not blocked, next up)
+- Browser verification of `/admin/companies` (manual checklist below — companies section pending)
 - Employee invitations (blocked: Resend key) · Bunny signed video URLs (blocked: Bunny credentials)
+- Enforce `seat_limit` server-side when invitations are built
 - Awaiting partner answers to `docs/discovery-questions.md` (P0 blocks deeper data-model decisions)
 - Roadmap board: GitHub Project #3 — keep statuses updated as phases land
 
