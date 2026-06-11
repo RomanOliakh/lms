@@ -115,6 +115,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3001
 
 ## Important conventions
 
+- **Approved decisions live in `docs/decisions/` (ADR log).** A decision becomes canonical when its PR is merged by the OTHER partner. Claude must follow accepted decisions and never contradict them; to change one — propose a new ADR that supersedes it. Raw ideas go to the board's Ideas column first.
 - `types/supabase.ts` is generated — never edit manually. Regenerate with `supabase gen types typescript --linked > types/supabase.ts`.
 - Server Components are the default; add `"use client"` only where interactivity is needed.
 - Route handlers live in `app/api/**/route.ts`.
