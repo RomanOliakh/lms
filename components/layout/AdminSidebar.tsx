@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BookOpen, Users, LogOut } from "lucide-react";
+import { BookOpen, Building2, Users, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
+  { href: "/admin/companies", label: "Компанії", icon: Building2 },
   { href: "/admin/courses", label: "Курси", icon: BookOpen },
   { href: "/admin/students", label: "Студенти", icon: Users },
 ];
