@@ -235,7 +235,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3001
 - Files: `lib/actions/organizations.ts`, `components/company/CompanyForm.tsx` + `DeleteCompanyButton.tsx`, `app/(admin)/admin/companies/{,new/,[id]/}page.tsx`; sidebar item «Компанії»
 - **Live RLS isolation test passed**: 2 seeded companies (`test-co-a`, `test-co-b` — left in DB for browser checks) + 2 student users; company_admin of A sees only A (orgs and members), learner of B sees only B, platform admin sees both, cross-org UPDATE → 0 rows, cross-org INSERT → 42501
 - ⚠️ Testing gotcha: impersonating via `set_config(...)` inside a CTE gives **phantom RLS leaks** — the plan is built while still `postgres` (BYPASSRLS). Test RLS only as separate statements: `begin; set local role authenticated; set local request.jwt.claims = '...'; <query>; rollback;`
-- NOT yet done: browser verification of the UI; seat_limit is informational only (not enforced on insert — enforce when invitations land)
+- ~~NOT yet done: browser verification of the UI~~ ✅ verified in browser 2026-06-11: list (seat usage 1/10, 1/5, status badges), create (cyrillic name «Тестова Компанія Ц» → slug `testova-kompaniia-ts`, seat_limit, redirect to edit), edit (rename, suspend → «Призупинена» badge; slug NOT overwritten on rename), delete with confirm → list updated, DB row gone (seeded A/B intact), members table renders real member (email/role/status). seat_limit still informational only (not enforced on insert — enforce when invitations land)
 
 ## Current sprint
 **B2B pivot in progress** (see Product scope above). Sprints 1–3 (B2C) ✅ done and verified 2026-06-07; Phase 0 (tenancy foundation) ✅ 2026-06-10 and company provisioning UI ✅ 2026-06-11, both on branch `feat/b2b-tenancy-foundation` (PR #6).
@@ -243,7 +243,7 @@ Dev environment fully configured: `.env.local` has all Supabase + Stripe keys se
 Notion status page: https://www.notion.so/366fbb2a781f81ff929ae0472e66fb08
 
 ### Next tasks
-- Browser verification of `/admin/companies` (manual checklist below — companies section pending)
+- ~~Browser verification of `/admin/companies`~~ ✅ done 2026-06-11 (see Phase 0/provisioning notes above)
 - Employee invitations (blocked: Resend key) · Bunny signed video URLs (blocked: Bunny credentials)
 - Enforce `seat_limit` server-side when invitations are built
 - Awaiting partner answers to `docs/discovery-questions.md` (P0 blocks deeper data-model decisions)
