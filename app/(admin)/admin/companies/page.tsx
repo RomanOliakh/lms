@@ -8,6 +8,14 @@ type Organization = Tables<"organizations"> & {
   organization_members: { count: number }[];
 };
 
+function companiesLabel(n: number): string {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return "компанія";
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return "компанії";
+  return "компаній";
+}
+
 export default async function CompaniesPage() {
   const supabase = await createClient();
   const { data: organizations } = await supabase
@@ -21,7 +29,7 @@ export default async function CompaniesPage() {
         <div>
           <h1 className="text-xl font-semibold text-n-900 tracking-tight">Компанії</h1>
           <p className="text-sm text-n-400 mt-0.5">
-            {organizations?.length ?? 0} компані{(organizations?.length ?? 0) === 1 ? "я" : "й"}
+            {organizations?.length ?? 0} {companiesLabel(organizations?.length ?? 0)}
           </p>
         </div>
         <Link

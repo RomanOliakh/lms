@@ -1,9 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
+
+function friendlyDbError(error: { code?: string; message: string }): string {
+  if (error.code === "23505") return "Компанія з таким slug вже існує";
+  return error.message;
+}
 
 export async function createOrganization(formData: FormData) {
   const supabase = await createClient();
@@ -19,7 +23,7 @@ export async function createOrganization(formData: FormData) {
     .select("id")
     .single();
 
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(friendlyDbError(error));
 
   return { id: data.id };
 }
@@ -32,12 +36,15 @@ export async function updateOrganization(id: string, formData: FormData) {
   const seat_limit = Math.max(0, parseInt((formData.get("seat_limit") as string) || "0", 10) || 0);
   const status = formData.get("status") === "suspended" ? "suspended" : "active";
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("organizations")
     .update({ name, slug, logo_url, seat_limit, status })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(friendlyDbError(error));
+  // RLS silently filters out rows the caller can't touch — surface that instead of pretending success
+  if (!data?.length) throw new Error("Компанію не знайдено або бракує прав");
 
   revalidatePath(`/admin/companies/${id}`);
   revalidatePath("/admin/companies");
@@ -45,8 +52,14 @@ export async function updateOrganization(id: string, formData: FormData) {
 
 export async function deleteOrganization(id: string) {
   const supabase = await createClient();
-  const { error } = await supabase.from("organizations").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+  const { data, error } = await supabase
+    .from("organizations")
+    .delete()
+    .eq("id", id)
+    .select("id");
+
+  if (error) throw new Error(friendlyDbError(error));
+  if (!data?.length) throw new Error("Компанію не знайдено або бракує прав");
+
   revalidatePath("/admin/companies");
-  redirect("/admin/companies");
 }
