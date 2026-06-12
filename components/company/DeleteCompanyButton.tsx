@@ -11,14 +11,14 @@ export default function DeleteCompanyButton({ organizationId }: { organizationId
   const [isPending, startTransition] = useTransition();
 
   function handleClick() {
-    if (!confirm("Видалити компанію і всіх її співробітників?")) return;
+    if (!confirm("Delete this company and all its members?")) return;
     setError("");
     startTransition(async () => {
       try {
         await deleteOrganization(organizationId);
         router.push("/admin/companies");
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Помилка видалення");
+        setError(err instanceof Error ? err.message : "Failed to delete");
       }
     });
   }
@@ -32,7 +32,7 @@ export default function DeleteCompanyButton({ organizationId }: { organizationId
         className="inline-flex items-center gap-1.5 text-sm text-n-400 hover:text-danger transition-colors disabled:opacity-50"
       >
         <Trash2 className="w-4 h-4" />
-        {isPending ? "Видалення..." : "Видалити компанію"}
+        {isPending ? "Deleting..." : "Delete company"}
       </button>
     </div>
   );

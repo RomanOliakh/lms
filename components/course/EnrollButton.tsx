@@ -25,7 +25,7 @@ export default function EnrollButton({
         href="/login"
         className="inline-flex items-center px-5 py-2 rounded-sm bg-lms-accent text-white text-sm font-semibold hover:bg-lms-accent-600 transition-colors"
       >
-        Увійти, щоб записатись
+        Sign in to enroll
       </a>
     );
   }
@@ -36,7 +36,7 @@ export default function EnrollButton({
         href={`/learn/${firstLessonSlug}`}
         className="inline-flex items-center px-5 py-2 rounded-sm bg-lms-accent text-white text-sm font-semibold hover:bg-lms-accent-600 transition-colors"
       >
-        Продовжити навчання →
+        Continue learning →
       </a>
     );
   }
@@ -44,7 +44,7 @@ export default function EnrollButton({
   if (enrolled) {
     return (
       <span className="inline-flex items-center px-5 py-2 rounded-sm bg-n-100 text-n-600 text-sm font-semibold">
-        Ви вже записані
+        Already enrolled
       </span>
     );
   }
@@ -61,7 +61,7 @@ export default function EnrollButton({
         const data = await res.json();
 
         if (!res.ok) {
-          setError(data.error ?? "Помилка запису");
+          setError(data.error ?? "Enrollment failed");
           return;
         }
 
@@ -77,7 +77,7 @@ export default function EnrollButton({
           router.push(`/learn/${firstLessonSlug}`);
         }
       } catch {
-        setError("Помилка з'єднання");
+        setError("Connection error");
       }
     });
   }
@@ -89,7 +89,7 @@ export default function EnrollButton({
         disabled={isPending}
         className="inline-flex items-center px-5 py-2 rounded-sm bg-lms-accent text-white text-sm font-semibold hover:bg-lms-accent-600 transition-colors disabled:opacity-60"
       >
-        {isPending ? "Записуємось..." : "Записатись на курс"}
+        {isPending ? "Enrolling..." : "Enroll in course"}
       </button>
       {error && <p className="text-xs text-danger">{error}</p>}
     </div>

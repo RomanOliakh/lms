@@ -36,7 +36,7 @@ export default function QuizBuilder({
   }
 
   function handleDeleteQuestion(id: string) {
-    if (!confirm("Видалити питання?")) return;
+    if (!confirm("Delete this question?")) return;
     startTransition(async () => {
       await deleteQuestion(id, lessonId, courseId);
     });
@@ -76,7 +76,7 @@ export default function QuizBuilder({
     <div className="space-y-4">
       {questions.length === 0 && (
         <p className="text-sm text-n-400 py-4 text-center border border-dashed border-n-200 rounded-md">
-          Питань ще немає
+          No questions yet
         </p>
       )}
 
@@ -90,15 +90,15 @@ export default function QuizBuilder({
               value={q.question}
               onCommit={(val) => handleQuestionChange(q.id, "question", val)}
               className="flex-1 text-sm border-n-200 focus-visible:ring-lms-accent"
-              placeholder="Текст питання"
+              placeholder="Question text"
             />
             <select
               defaultValue={q.type}
               onChange={(e) => handleQuestionChange(q.id, "type", e.target.value)}
               className="text-xs border border-n-200 rounded-xs px-2 py-1 bg-n-0 text-n-700 focus:outline-none focus:ring-1 focus:ring-lms-accent"
             >
-              <option value="single">Одна відповідь</option>
-              <option value="multiple">Кілька відповідей</option>
+              <option value="single">Single answer</option>
+              <option value="multiple">Multiple answers</option>
             </select>
             <button
               onClick={() => handleDeleteQuestion(q.id)}
@@ -126,7 +126,7 @@ export default function QuizBuilder({
                   value={opt.text}
                   onCommit={(val) => handleOptionTextChange(opt.id, val)}
                   className="flex-1 text-sm border-n-200 focus-visible:ring-lms-accent"
-                  placeholder="Текст варіанту"
+                  placeholder="Option text"
                 />
                 <button
                   onClick={() => handleDeleteOption(opt.id)}
@@ -144,7 +144,7 @@ export default function QuizBuilder({
                 className="text-xs text-lms-accent hover:text-lms-accent-600 font-medium flex items-center gap-1"
               >
                 <Plus className="w-3 h-3" />
-                Додати варіант
+                Add option
               </button>
             </div>
           </div>
@@ -158,7 +158,7 @@ export default function QuizBuilder({
         className="border-n-200 text-n-700 hover:bg-n-50"
       >
         <Plus className="w-4 h-4 mr-2" />
-        Додати питання
+        Add question
       </Button>
     </div>
   );
