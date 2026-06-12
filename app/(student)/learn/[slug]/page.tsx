@@ -38,7 +38,19 @@ export default async function LearnPage({
     .eq("course_id", courseId)
     .maybeSingle();
 
-  if (!enrollment) redirect(`/courses/${courseSlug}`);
+  // B2B: a course assigned to the user by their company also grants access
+  let hasAccess = !!enrollment;
+  if (!hasAccess) {
+    const { data: assignments } = await supabase
+      .from("course_assignments")
+      .select("id, organization_members!inner(user_id)")
+      .eq("course_id", courseId)
+      .eq("organization_members.user_id", user.id)
+      .limit(1);
+    hasAccess = (assignments?.length ?? 0) > 0;
+  }
+
+  if (!hasAccess) redirect(`/courses/${courseSlug}`);
 
   const { data: modules } = await supabase
     .from("modules")
