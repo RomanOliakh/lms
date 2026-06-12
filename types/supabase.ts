@@ -249,6 +249,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          invite_token: string
           invited_email: string | null
           org_id: string
           org_role: string
@@ -258,6 +259,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          invite_token?: string
           invited_email?: string | null
           org_id: string
           org_role?: string
@@ -267,6 +269,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          invite_token?: string
           invited_email?: string | null
           org_id?: string
           org_role?: string
