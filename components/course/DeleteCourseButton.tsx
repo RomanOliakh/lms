@@ -8,7 +8,7 @@ export default function DeleteCourseButton({ courseId }: { courseId: string }) {
   const [isPending, startTransition] = useTransition();
 
   function handleClick() {
-    if (!confirm("Видалити курс і всі його модулі/уроки?")) return;
+    if (!confirm("Delete this course and all its modules/lessons?")) return;
     startTransition(async () => {
       await deleteCourse(courseId);
     });
@@ -21,7 +21,7 @@ export default function DeleteCourseButton({ courseId }: { courseId: string }) {
       className="inline-flex items-center gap-1.5 text-sm text-n-400 hover:text-danger transition-colors disabled:opacity-50"
     >
       <Trash2 className="w-4 h-4" />
-      {isPending ? "Видалення..." : "Видалити курс"}
+      {isPending ? "Deleting..." : "Delete course"}
     </button>
   );
 }

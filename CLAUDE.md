@@ -239,7 +239,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3001
 
 ## Current sprint
 **B2B pivot in progress** (see Product scope above). Sprints 1–3 (B2C) ✅ done and verified 2026-06-07. **Phase 0 (tenancy) + company provisioning UI ✅ MERGED to main 2026-06-11** (PR #6: browser-verified, RLS isolation test passed, two code reviews — Claude + CodeRabbit — all findings addressed; follow-up migration `20260611150000` adds membership identity constraints).
-**UI translation to English is in progress** (branch `feat/english-ui`, separate Zed session) — the platform will be English-first with English content. UI strings only; docs stay as-is for now.
+UI translated to English ✅ 2026-06-12 (`feat/english-ui`, PR #8): all user-visible strings in `app/**`, `components/**`, `lib/actions/**` + `<html lang="en">`; verified by Cyrillic-grep (0 matches), `tsc --noEmit`, and dev-server render of /login + /courses. DB course content stays as is; `lib/utils.ts` transliteration map untouched (functional). Platform is English-first with English content; docs stay as-is for now.
 Dev environment fully configured: `.env.local` has all Supabase + Stripe keys set. Dev server runs on port 3001. Supabase Site URL set to :3001. Stripe account business name set ("LMS Test", test mode). `BUNNY_*` and `RESEND_API_KEY` are **empty** — v1 blockers.
 Notion status page: https://www.notion.so/366fbb2a781f81ff929ae0472e66fb08
 

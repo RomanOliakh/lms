@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
-  { href: "/admin/companies", label: "Компанії", icon: Building2 },
-  { href: "/admin/courses", label: "Курси", icon: BookOpen },
-  { href: "/admin/students", label: "Студенти", icon: Users },
+  { href: "/admin/companies", label: "Companies", icon: Building2 },
+  { href: "/admin/courses", label: "Courses", icon: BookOpen },
+  { href: "/admin/students", label: "Students", icon: Users },
 ];
 
 export default function AdminSidebar() {
@@ -52,7 +52,7 @@ export default function AdminSidebar() {
           className="flex items-center gap-3 px-3 py-2 w-full rounded-sm text-sm text-n-600 hover:bg-n-100 hover:text-n-900 transition-colors"
         >
           <LogOut className="w-4 h-4 shrink-0" />
-          Вийти
+          Sign out
         </button>
       </div>
     </aside>

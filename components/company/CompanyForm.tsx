@@ -42,7 +42,7 @@ export default function CompanyForm({ organization }: { organization?: Organizat
           router.push(`/admin/companies/${result.id}`);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Помилка збереження");
+        setError(err instanceof Error ? err.message : "Failed to save");
       }
     });
   }
@@ -50,13 +50,13 @@ export default function CompanyForm({ organization }: { organization?: Organizat
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-1.5">
-        <Label htmlFor="name" className="text-n-700">Назва компанії</Label>
+        <Label htmlFor="name" className="text-n-700">Company name</Label>
         <Input
           id="name"
           name="name"
           value={name}
           onChange={(e) => handleNameChange(e.target.value)}
-          placeholder="ТОВ «Компанія»"
+          placeholder="Acme Inc."
           required
           className="border-n-200 focus-visible:ring-lms-accent"
         />
@@ -69,14 +69,14 @@ export default function CompanyForm({ organization }: { organization?: Organizat
           name="slug"
           value={slug}
           onChange={(e) => { setSlug(e.target.value); setSlugEdited(true); }}
-          placeholder="kompaniia"
+          placeholder="acme-inc"
           required
           className="border-n-200 focus-visible:ring-lms-accent font-mono text-sm"
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="seat_limit" className="text-n-700">Ліміт місць</Label>
+        <Label htmlFor="seat_limit" className="text-n-700">Seat limit</Label>
         <Input
           id="seat_limit"
           name="seat_limit"
@@ -87,11 +87,11 @@ export default function CompanyForm({ organization }: { organization?: Organizat
           onChange={(e) => setSeatLimit(e.target.value)}
           className="border-n-200 focus-visible:ring-lms-accent"
         />
-        <p className="text-xs text-n-400">0 — без обмеження</p>
+        <p className="text-xs text-n-400">0 — unlimited</p>
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="logo_url" className="text-n-700">URL логотипа</Label>
+        <Label htmlFor="logo_url" className="text-n-700">Logo URL</Label>
         <Input
           id="logo_url"
           name="logo_url"
@@ -111,7 +111,7 @@ export default function CompanyForm({ organization }: { organization?: Organizat
           className="w-4 h-4 accent-lms-accent"
         />
         <Label htmlFor="is_active" className="text-n-700 cursor-pointer">
-          Активна (зніміть, щоб призупинити доступ)
+          Active (uncheck to suspend access)
         </Label>
       </div>
 
@@ -122,7 +122,7 @@ export default function CompanyForm({ organization }: { organization?: Organizat
         disabled={isPending}
         className="bg-lms-accent hover:bg-lms-accent-600 text-white"
       >
-        {isPending ? "Збереження..." : organization ? "Зберегти зміни" : "Створити компанію"}
+        {isPending ? "Saving..." : organization ? "Save changes" : "Create company"}
       </Button>
     </form>
   );

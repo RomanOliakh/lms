@@ -8,14 +8,6 @@ type Organization = Tables<"organizations"> & {
   organization_members: { count: number }[];
 };
 
-function companiesLabel(n: number): string {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return "компанія";
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return "компанії";
-  return "компаній";
-}
-
 export default async function CompaniesPage() {
   const supabase = await createClient();
   const { data: organizations } = await supabase
@@ -27,9 +19,9 @@ export default async function CompaniesPage() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-n-900 tracking-tight">Компанії</h1>
+          <h1 className="text-xl font-semibold text-n-900 tracking-tight">Companies</h1>
           <p className="text-sm text-n-400 mt-0.5">
-            {organizations?.length ?? 0} {companiesLabel(organizations?.length ?? 0)}
+            {organizations?.length ?? 0} {(organizations?.length ?? 0) === 1 ? "company" : "companies"}
           </p>
         </div>
         <Link
@@ -37,23 +29,23 @@ export default async function CompaniesPage() {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-medium bg-lms-accent hover:bg-lms-accent-600 text-white transition-colors"
         >
           <Plus className="w-4 h-4" />
-          Нова компанія
+          New company
         </Link>
       </div>
 
       {!organizations?.length ? (
         <div className="border border-dashed border-n-200 rounded-md p-12 text-center">
-          <p className="text-sm text-n-400">Ще немає компаній. Створіть першу!</p>
+          <p className="text-sm text-n-400">No companies yet. Create your first one!</p>
         </div>
       ) : (
         <div className="border border-n-200 rounded-md overflow-hidden shadow-1">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-n-200 bg-n-50">
-                <th className="text-left px-4 py-3 text-n-600 font-medium">Назва</th>
+                <th className="text-left px-4 py-3 text-n-600 font-medium">Name</th>
                 <th className="text-left px-4 py-3 text-n-600 font-medium">Slug</th>
-                <th className="text-left px-4 py-3 text-n-600 font-medium">Місця</th>
-                <th className="text-left px-4 py-3 text-n-600 font-medium">Статус</th>
+                <th className="text-left px-4 py-3 text-n-600 font-medium">Seats</th>
+                <th className="text-left px-4 py-3 text-n-600 font-medium">Status</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -76,7 +68,7 @@ export default async function CompaniesPage() {
                             : "bg-warn/10 text-warn border-warn/20"
                         }
                       >
-                        {org.status === "active" ? "Активна" : "Призупинена"}
+                        {org.status === "active" ? "Active" : "Suspended"}
                       </Badge>
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -84,7 +76,7 @@ export default async function CompaniesPage() {
                         href={`/admin/companies/${org.id}`}
                         className="text-lms-accent hover:text-lms-accent-600 text-sm font-medium"
                       >
-                        Редагувати
+                        Edit
                       </Link>
                     </td>
                   </tr>

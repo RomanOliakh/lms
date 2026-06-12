@@ -44,7 +44,7 @@ export default function CourseForm({ course }: { course?: Course }) {
           router.push(`/admin/courses/${result.id}`);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Помилка збереження");
+        setError(err instanceof Error ? err.message : "Failed to save");
       }
     });
   }
@@ -52,13 +52,13 @@ export default function CourseForm({ course }: { course?: Course }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-1.5">
-        <Label htmlFor="title" className="text-n-700">Назва</Label>
+        <Label htmlFor="title" className="text-n-700">Title</Label>
         <Input
           id="title"
           name="title"
           value={title}
           onChange={(e) => handleTitleChange(e.target.value)}
-          placeholder="Назва курсу"
+          placeholder="Course title"
           required
           className="border-n-200 focus-visible:ring-lms-accent"
         />
@@ -71,27 +71,27 @@ export default function CourseForm({ course }: { course?: Course }) {
           name="slug"
           value={slug}
           onChange={(e) => { setSlug(e.target.value); setSlugEdited(true); }}
-          placeholder="nazva-kursu"
+          placeholder="course-title"
           required
           className="border-n-200 focus-visible:ring-lms-accent font-mono text-sm"
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="description" className="text-n-700">Опис</Label>
+        <Label htmlFor="description" className="text-n-700">Description</Label>
         <Textarea
           id="description"
           name="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Короткий опис курсу"
+          placeholder="Short course description"
           rows={3}
           className="border-n-200 focus-visible:ring-lms-accent resize-none"
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="price" className="text-n-700">Ціна (₴)</Label>
+        <Label htmlFor="price" className="text-n-700">Price (UAH)</Label>
         <Input
           id="price"
           name="price"
@@ -105,7 +105,7 @@ export default function CourseForm({ course }: { course?: Course }) {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="thumbnail_url" className="text-n-700">URL обкладинки</Label>
+        <Label htmlFor="thumbnail_url" className="text-n-700">Thumbnail URL</Label>
         <Input
           id="thumbnail_url"
           name="thumbnail_url"
@@ -125,7 +125,7 @@ export default function CourseForm({ course }: { course?: Course }) {
           className="w-4 h-4 accent-lms-accent"
         />
         <Label htmlFor="is_published" className="text-n-700 cursor-pointer">
-          Опублікувати курс
+          Publish course
         </Label>
       </div>
 
@@ -136,7 +136,7 @@ export default function CourseForm({ course }: { course?: Course }) {
         disabled={isPending}
         className="bg-lms-accent hover:bg-lms-accent-600 text-white"
       >
-        {isPending ? "Збереження..." : course ? "Зберегти зміни" : "Створити курс"}
+        {isPending ? "Saving..." : course ? "Save changes" : "Create course"}
       </Button>
     </form>
   );

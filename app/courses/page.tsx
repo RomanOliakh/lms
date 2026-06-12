@@ -5,8 +5,8 @@ import { Tables } from "@/types/supabase";
 type Course = Tables<"courses">;
 
 function formatPrice(price: number) {
-  if (price === 0) return "Безкоштовно";
-  return `${price} грн`;
+  if (price === 0) return "Free";
+  return `${price} UAH`;
 }
 
 export default async function CoursesPage() {
@@ -21,13 +21,13 @@ export default async function CoursesPage() {
   return (
     <div className="min-h-screen bg-n-0">
       <div className="max-w-5xl mx-auto px-6 py-12">
-        <h1 className="text-2xl font-semibold text-n-900 tracking-tight mb-2">Каталог курсів</h1>
-        <p className="text-sm text-n-500 mb-8">Обирай курс і починай навчання</p>
+        <h1 className="text-2xl font-semibold text-n-900 tracking-tight mb-2">Course catalog</h1>
+        <p className="text-sm text-n-500 mb-8">Pick a course and start learning</p>
 
         {!courses || courses.length === 0 ? (
           <div className="text-center py-20 text-n-400">
-            <p className="text-base">Курсів поки немає</p>
-            <p className="text-sm mt-1">Зверніться до адміністратора</p>
+            <p className="text-base">No courses yet</p>
+            <p className="text-sm mt-1">Contact your administrator</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -55,7 +55,7 @@ function CourseCard({ course }: { course: Course }) {
         />
       ) : (
         <div className="w-full h-40 bg-n-100 flex items-center justify-center text-n-400 text-sm">
-          Без обкладинки
+          No cover image
         </div>
       )}
       <div className="p-4">

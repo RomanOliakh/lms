@@ -38,7 +38,7 @@ export default async function EditCoursePage({
           className="inline-flex items-center gap-1 text-sm text-n-500 hover:text-n-900"
         >
           <ChevronLeft className="w-4 h-4" />
-          Назад до курсів
+          Back to courses
         </Link>
         <DeleteCourseButton courseId={id} />
       </div>
@@ -47,7 +47,7 @@ export default async function EditCoursePage({
 
       <section className="mb-8">
         <h2 className="text-sm font-semibold text-n-700 uppercase tracking-wide mb-4">
-          Загальне
+          General
         </h2>
         <CourseForm course={course} />
       </section>
@@ -56,7 +56,7 @@ export default async function EditCoursePage({
 
       <section>
         <h2 className="text-sm font-semibold text-n-700 uppercase tracking-wide mb-4">
-          Навчальна програма
+          Curriculum
         </h2>
         <CurriculumEditor
           courseId={id}

@@ -50,7 +50,7 @@ export default function LessonPlayer({
           {content}
         </div>
       ) : (
-        <div className="py-10 text-center text-n-400 text-sm">Контент відсутній</div>
+        <div className="py-10 text-center text-n-400 text-sm">No content</div>
       )}
 
       <button
@@ -65,12 +65,12 @@ export default function LessonPlayer({
         {completed ? (
           <>
             <CheckCircle2 className="w-4 h-4" />
-            Урок завершено
+            Lesson completed
           </>
         ) : (
           <>
             <Circle className="w-4 h-4" />
-            {saving ? "Зберігаємо..." : "Позначити як завершений"}
+            {saving ? "Saving..." : "Mark as completed"}
           </>
         )}
       </button>

@@ -8,11 +8,11 @@ import CompanyForm from "@/components/company/CompanyForm";
 import DeleteCompanyButton from "@/components/company/DeleteCompanyButton";
 
 const ORG_ROLE_LABELS: Record<string, string> = {
-  owner: "Власник",
-  company_admin: "Адмін компанії",
-  manager: "Менеджер",
-  instructor: "Інструктор",
-  learner: "Співробітник",
+  owner: "Owner",
+  company_admin: "Company admin",
+  manager: "Manager",
+  instructor: "Instructor",
+  learner: "Learner",
 };
 
 export default async function EditCompanyPage({
@@ -45,7 +45,7 @@ export default async function EditCompanyPage({
           className="inline-flex items-center gap-1 text-sm text-n-500 hover:text-n-900"
         >
           <ChevronLeft className="w-4 h-4" />
-          Назад до компаній
+          Back to companies
         </Link>
         <DeleteCompanyButton organizationId={id} />
       </div>
@@ -56,7 +56,7 @@ export default async function EditCompanyPage({
 
       <section className="mb-8">
         <h2 className="text-sm font-semibold text-n-700 uppercase tracking-wide mb-4">
-          Загальне
+          General
         </h2>
         <CompanyForm organization={organization} />
       </section>
@@ -65,14 +65,14 @@ export default async function EditCompanyPage({
 
       <section>
         <h2 className="text-sm font-semibold text-n-700 uppercase tracking-wide mb-4">
-          Співробітники ({members?.length ?? 0}
+          Employees ({members?.length ?? 0}
           {organization.seat_limit > 0 ? ` / ${organization.seat_limit}` : ""})
         </h2>
 
         {!members?.length ? (
           <div className="border border-dashed border-n-200 rounded-md p-8 text-center">
             <p className="text-sm text-n-400">
-              Співробітників ще немає. Запрошення по email — наступна фаза.
+              No employees yet. Email invitations are coming in the next phase.
             </p>
           </div>
         ) : (
@@ -81,8 +81,8 @@ export default async function EditCompanyPage({
               <thead>
                 <tr className="border-b border-n-200 bg-n-50">
                   <th className="text-left px-4 py-3 text-n-600 font-medium">Email</th>
-                  <th className="text-left px-4 py-3 text-n-600 font-medium">Роль</th>
-                  <th className="text-left px-4 py-3 text-n-600 font-medium">Статус</th>
+                  <th className="text-left px-4 py-3 text-n-600 font-medium">Role</th>
+                  <th className="text-left px-4 py-3 text-n-600 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -103,7 +103,7 @@ export default async function EditCompanyPage({
                             : "bg-n-100 text-n-500 border-n-200"
                         }
                       >
-                        {member.status === "active" ? "Активний" : "Запрошений"}
+                        {member.status === "active" ? "Active" : "Invited"}
                       </Badge>
                     </td>
                   </tr>

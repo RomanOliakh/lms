@@ -36,7 +36,7 @@ export default function StudentHeader({ userEmail }: { userEmail: string }) {
           )}
         >
           <BookOpen className="w-3.5 h-3.5" />
-          Каталог
+          Catalog
         </Link>
         <Link
           href="/dashboard"
@@ -48,7 +48,7 @@ export default function StudentHeader({ userEmail }: { userEmail: string }) {
           )}
         >
           <LayoutDashboard className="w-3.5 h-3.5" />
-          Мої курси
+          My courses
         </Link>
       </nav>
 
@@ -59,7 +59,7 @@ export default function StudentHeader({ userEmail }: { userEmail: string }) {
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-sm text-n-600 hover:bg-n-100 hover:text-n-900 transition-colors"
         >
           <LogOut className="w-3.5 h-3.5" />
-          Вийти
+          Sign out
         </button>
       </div>
     </header>

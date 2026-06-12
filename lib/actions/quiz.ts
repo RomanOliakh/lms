@@ -18,7 +18,7 @@ export async function createQuestion(lessonId: string, courseId: string) {
 
   const { data, error } = await supabase
     .from("quiz_questions")
-    .insert({ lesson_id: lessonId, question: "Нове питання", position })
+    .insert({ lesson_id: lessonId, question: "New question", position })
     .select("id")
     .single();
 
@@ -61,7 +61,7 @@ export async function createOption(questionId: string, lessonId: string, courseI
 
   const { error } = await supabase
     .from("quiz_options")
-    .insert({ question_id: questionId, text: "Варіант відповіді", position });
+    .insert({ question_id: questionId, text: "Answer option", position });
 
   if (error) throw new Error(error.message);
   revalidatePath(`/admin/courses/${courseId}/lessons/${lessonId}`);

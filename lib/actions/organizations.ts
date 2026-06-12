@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
 
 function friendlyDbError(error: { code?: string; message: string }): string {
-  if (error.code === "23505") return "Компанія з таким slug вже існує";
+  if (error.code === "23505") return "A company with this slug already exists";
   return error.message;
 }
 
@@ -44,7 +44,7 @@ export async function updateOrganization(id: string, formData: FormData) {
 
   if (error) throw new Error(friendlyDbError(error));
   // RLS silently filters out rows the caller can't touch — surface that instead of pretending success
-  if (!data?.length) throw new Error("Компанію не знайдено або бракує прав");
+  if (!data?.length) throw new Error("Company not found or insufficient permissions");
 
   revalidatePath(`/admin/companies/${id}`);
   revalidatePath("/admin/companies");
@@ -59,7 +59,7 @@ export async function deleteOrganization(id: string) {
     .select("id");
 
   if (error) throw new Error(friendlyDbError(error));
-  if (!data?.length) throw new Error("Компанію не знайдено або бракує прав");
+  if (!data?.length) throw new Error("Company not found or insufficient permissions");
 
   revalidatePath("/admin/companies");
 }

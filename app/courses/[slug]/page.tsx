@@ -62,7 +62,7 @@ export default async function CourseSlugPage({
           className="inline-flex items-center gap-1 text-sm text-n-500 hover:text-n-900 mb-6"
         >
           <ChevronLeft className="w-4 h-4" />
-          Каталог курсів
+          Course catalog
         </Link>
 
         {course.thumbnail_url && (
@@ -83,20 +83,20 @@ export default async function CourseSlugPage({
           {totalLessons > 0 && (
             <span className="flex items-center gap-1">
               <BookOpen className="w-3.5 h-3.5" />
-              {totalLessons} урок{totalLessons === 1 ? "" : "и"}
+              {totalLessons} lesson{totalLessons === 1 ? "" : "s"}
             </span>
           )}
           {totalDuration > 0 && (
             <span className="flex items-center gap-1">
               <Clock className="w-3.5 h-3.5" />
-              {Math.round(totalDuration / 60)} хв
+              {Math.round(totalDuration / 60)} min
             </span>
           )}
         </div>
 
         <div className="flex items-center gap-4 mb-8">
           <p className="text-xl font-semibold text-n-900">
-            {course.price === 0 ? "Безкоштовно" : `${course.price} грн`}
+            {course.price === 0 ? "Free" : `${course.price} UAH`}
           </p>
           <EnrollButton
             courseId={course.id}
@@ -109,7 +109,7 @@ export default async function CourseSlugPage({
         {(modules ?? []).length > 0 && (
           <section>
             <h2 className="text-sm font-semibold text-n-700 uppercase tracking-wide mb-3">
-              Програма курсу
+              Curriculum
             </h2>
             <div className="space-y-2">
               {(modules ?? []).map((module) => (
@@ -124,7 +124,7 @@ export default async function CourseSlugPage({
                           <span>{lesson.title}</span>
                           {lesson.duration && (
                             <span className="text-xs text-n-400">
-                              {Math.round(lesson.duration / 60)} хв
+                              {Math.round(lesson.duration / 60)} min
                             </span>
                           )}
                         </li>

@@ -40,7 +40,7 @@ export default function QuizTaker({
   async function handleSubmit() {
     const unanswered = questions.filter((q) => !(answers[q.id]?.length > 0));
     if (unanswered.length > 0) {
-      setError("Дайте відповідь на всі питання");
+      setError("Please answer all questions");
       return;
     }
     setError("");
@@ -53,7 +53,7 @@ export default function QuizTaker({
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Помилка перевірки");
+        setError(data.error ?? "Submission failed");
         return;
       }
       setResults(data.results);
@@ -76,7 +76,7 @@ export default function QuizTaker({
 
   return (
     <div className="mt-8 border-t border-n-200 pt-6 space-y-6">
-      <h2 className="text-sm font-semibold text-n-700 uppercase tracking-wide">Тест</h2>
+      <h2 className="text-sm font-semibold text-n-700 uppercase tracking-wide">Quiz</h2>
 
       {score && (
         <div className={`flex items-center gap-2 px-4 py-3 rounded-md text-sm font-semibold ${
@@ -89,13 +89,13 @@ export default function QuizTaker({
           ) : (
             <XCircle className="w-4 h-4" />
           )}
-          Результат: {score.correct} / {score.total}
+          Score: {score.correct} / {score.total}
           {score.correct < score.total && (
             <button
               onClick={handleRetry}
               className="ml-auto text-xs underline font-normal hover:no-underline"
             >
-              Спробувати ще раз
+              Try again
             </button>
           )}
         </div>
@@ -111,7 +111,7 @@ export default function QuizTaker({
               <p className="text-sm font-semibold text-n-800">
                 {qi + 1}. {question.question}
                 {question.type === "multiple" && (
-                  <span className="ml-1.5 text-xs font-normal text-n-400">(кілька відповідей)</span>
+                  <span className="ml-1.5 text-xs font-normal text-n-400">(multiple answers)</span>
                 )}
               </p>
               <div className="space-y-1.5">
@@ -170,7 +170,7 @@ export default function QuizTaker({
           disabled={submitting}
           className="inline-flex items-center px-4 py-2 rounded-sm bg-lms-accent text-white text-sm font-semibold hover:bg-lms-accent-600 transition-colors disabled:opacity-60"
         >
-          {submitting ? "Перевіряємо..." : "Перевірити відповіді"}
+          {submitting ? "Checking..." : "Check answers"}
         </button>
       )}
     </div>

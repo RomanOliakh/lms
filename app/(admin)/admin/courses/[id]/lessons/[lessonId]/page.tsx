@@ -39,14 +39,14 @@ export default async function EditLessonPage({
         className="inline-flex items-center gap-1 text-sm text-n-500 hover:text-n-900 mb-6"
       >
         <ChevronLeft className="w-4 h-4" />
-        Назад до курсу
+        Back to course
       </Link>
 
       <h1 className="text-xl font-semibold text-n-900 tracking-tight mb-6">{lesson.title}</h1>
 
       <section className="mb-8">
         <h2 className="text-sm font-semibold text-n-700 uppercase tracking-wide mb-4">
-          Урок
+          Lesson
         </h2>
         <LessonForm lesson={lesson} courseId={courseId} />
       </section>
@@ -55,7 +55,7 @@ export default async function EditLessonPage({
 
       <section>
         <h2 className="text-sm font-semibold text-n-700 uppercase tracking-wide mb-4">
-          Квіз
+          Quiz
         </h2>
         <QuizBuilder
           lessonId={lessonId}

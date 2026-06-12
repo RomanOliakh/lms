@@ -46,7 +46,7 @@ export default function LessonForm({ lesson, courseId }: { lesson: Lesson; cours
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Помилка збереження");
+        setError(err instanceof Error ? err.message : "Failed to save");
       }
     });
   }
@@ -54,7 +54,7 @@ export default function LessonForm({ lesson, courseId }: { lesson: Lesson; cours
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-1.5">
-        <Label htmlFor="title" className="text-n-700">Назва</Label>
+        <Label htmlFor="title" className="text-n-700">Title</Label>
         <Input
           id="title"
           value={title}
@@ -76,33 +76,33 @@ export default function LessonForm({ lesson, courseId }: { lesson: Lesson; cours
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="type" className="text-n-700">Тип уроку</Label>
+        <Label htmlFor="type" className="text-n-700">Lesson type</Label>
         <select
           id="type"
           value={type}
           onChange={(e) => setType(e.target.value)}
           className="w-full border border-n-200 rounded-sm px-3 py-2 text-sm bg-n-0 text-n-900 focus:outline-none focus:ring-1 focus:ring-lms-accent"
         >
-          <option value="text">Текст (MDX)</option>
-          <option value="video">Відео (Bunny.net)</option>
+          <option value="text">Text (MDX)</option>
+          <option value="video">Video (Bunny.net)</option>
         </select>
       </div>
 
       {type === "text" ? (
         <div className="space-y-1.5">
-          <Label htmlFor="content" className="text-n-700">Контент (MDX)</Label>
+          <Label htmlFor="content" className="text-n-700">Content (MDX)</Label>
           <Textarea
             id="content"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={8}
-            placeholder={"## Заголовок\n\nТекст уроку..."}
+            placeholder={"## Heading\n\nLesson text..."}
             className="border-n-200 focus-visible:ring-lms-accent font-mono text-sm resize-y"
           />
         </div>
       ) : (
         <div className="space-y-1.5">
-          <Label htmlFor="video_url" className="text-n-700">URL відео (Bunny.net)</Label>
+          <Label htmlFor="video_url" className="text-n-700">Video URL (Bunny.net)</Label>
           <Input
             id="video_url"
             value={videoUrl}
@@ -114,7 +114,7 @@ export default function LessonForm({ lesson, courseId }: { lesson: Lesson; cours
       )}
 
       <div className="space-y-1.5">
-        <Label htmlFor="duration" className="text-n-700">Тривалість (секунди)</Label>
+        <Label htmlFor="duration" className="text-n-700">Duration (seconds)</Label>
         <Input
           id="duration"
           type="number"
@@ -133,7 +133,7 @@ export default function LessonForm({ lesson, courseId }: { lesson: Lesson; cours
         disabled={isPending}
         className="bg-lms-accent hover:bg-lms-accent-600 text-white"
       >
-        {isPending ? "Збереження..." : saved ? "Збережено ✓" : "Зберегти урок"}
+        {isPending ? "Saving..." : saved ? "Saved ✓" : "Save lesson"}
       </Button>
     </form>
   );

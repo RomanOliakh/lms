@@ -51,7 +51,7 @@ export default function CurriculumEditor({
   }
 
   function handleDeleteModule(id: string) {
-    if (!confirm("Видалити модуль і всі його уроки?")) return;
+    if (!confirm("Delete this module and all its lessons?")) return;
     startTransition(async () => {
       await deleteModule(id, courseId);
     });
@@ -73,7 +73,7 @@ export default function CurriculumEditor({
   }
 
   function handleDeleteLesson(lessonId: string) {
-    if (!confirm("Видалити урок?")) return;
+    if (!confirm("Delete this lesson?")) return;
     startTransition(async () => {
       await deleteLesson(lessonId, courseId);
     });
@@ -124,7 +124,7 @@ export default function CurriculumEditor({
                   onClick={() => setEditingModule(null)}
                   className="h-7 text-xs px-2"
                 >
-                  Скасувати
+                  Cancel
                 </Button>
               </div>
             ) : (
@@ -178,7 +178,7 @@ export default function CurriculumEditor({
                       ? "bg-lms-accent-50 text-lms-accent"
                       : "bg-n-100 text-n-500"
                   )}>
-                    {lesson.type === "video" ? "Відео" : "Текст"}
+                    {lesson.type === "video" ? "Video" : "Text"}
                   </span>
                   <button
                     onClick={() => handleMoveLesson(lesson.id, mod.id, "up")}
@@ -211,7 +211,7 @@ export default function CurriculumEditor({
 
               <div className="flex items-center gap-2 px-4 py-2.5">
                 <Input
-                  placeholder="Назва уроку"
+                  placeholder="Lesson title"
                   value={newLessonTitles[mod.id] ?? ""}
                   onChange={(e) =>
                     setNewLessonTitles((prev) => ({ ...prev, [mod.id]: e.target.value }))
@@ -226,7 +226,7 @@ export default function CurriculumEditor({
                   className="h-7 bg-lms-accent hover:bg-lms-accent-600 text-white text-xs px-2 shrink-0"
                 >
                   <Plus className="w-3 h-3 mr-1" />
-                  Урок
+                  Lesson
                 </Button>
               </div>
             </div>
@@ -236,7 +236,7 @@ export default function CurriculumEditor({
 
       <div className="flex items-center gap-2 pt-1">
         <Input
-          placeholder="Назва модуля"
+          placeholder="Module title"
           value={newModuleTitle}
           onChange={(e) => setNewModuleTitle(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleAddModule()}
@@ -248,7 +248,7 @@ export default function CurriculumEditor({
           className="bg-lms-accent hover:bg-lms-accent-600 text-white shrink-0"
         >
           <Plus className="w-4 h-4 mr-1" />
-          Модуль
+          Module
         </Button>
       </div>
     </div>

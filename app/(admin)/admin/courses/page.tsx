@@ -18,9 +18,9 @@ export default async function CoursesPage() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-n-900 tracking-tight">Курси</h1>
+          <h1 className="text-xl font-semibold text-n-900 tracking-tight">Courses</h1>
           <p className="text-sm text-n-400 mt-0.5">
-            {courses?.length ?? 0} курс{(courses?.length ?? 0) !== 1 ? "ів" : ""}
+            {courses?.length ?? 0} course{(courses?.length ?? 0) !== 1 ? "s" : ""}
           </p>
         </div>
         <Link
@@ -28,23 +28,23 @@ export default async function CoursesPage() {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-medium bg-lms-accent hover:bg-lms-accent-600 text-white transition-colors"
         >
           <Plus className="w-4 h-4" />
-          Новий курс
+          New course
         </Link>
       </div>
 
       {!courses?.length ? (
         <div className="border border-dashed border-n-200 rounded-md p-12 text-center">
-          <p className="text-sm text-n-400">Ще немає курсів. Створіть перший!</p>
+          <p className="text-sm text-n-400">No courses yet. Create your first one!</p>
         </div>
       ) : (
         <div className="border border-n-200 rounded-md overflow-hidden shadow-1">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-n-200 bg-n-50">
-                <th className="text-left px-4 py-3 text-n-600 font-medium">Назва</th>
+                <th className="text-left px-4 py-3 text-n-600 font-medium">Title</th>
                 <th className="text-left px-4 py-3 text-n-600 font-medium">Slug</th>
-                <th className="text-left px-4 py-3 text-n-600 font-medium">Ціна</th>
-                <th className="text-left px-4 py-3 text-n-600 font-medium">Статус</th>
+                <th className="text-left px-4 py-3 text-n-600 font-medium">Price</th>
+                <th className="text-left px-4 py-3 text-n-600 font-medium">Status</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -54,7 +54,7 @@ export default async function CoursesPage() {
                   <td className="px-4 py-3 text-n-900 font-medium">{course.title}</td>
                   <td className="px-4 py-3 text-n-500 font-mono text-xs">{course.slug}</td>
                   <td className="px-4 py-3 text-n-700">
-                    {course.price === 0 ? "Безкоштовно" : `₴${course.price}`}
+                    {course.price === 0 ? "Free" : `${course.price} UAH`}
                   </td>
                   <td className="px-4 py-3">
                     <Badge
@@ -65,7 +65,7 @@ export default async function CoursesPage() {
                           : "bg-n-100 text-n-500 border-n-200"
                       }
                     >
-                      {course.is_published ? "Опубліковано" : "Чернетка"}
+                      {course.is_published ? "Published" : "Draft"}
                     </Badge>
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -73,7 +73,7 @@ export default async function CoursesPage() {
                       href={`/admin/courses/${course.id}`}
                       className="text-lms-accent hover:text-lms-accent-600 text-sm font-medium"
                     >
-                      Редагувати
+                      Edit
                     </Link>
                   </td>
                 </tr>
