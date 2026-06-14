@@ -111,6 +111,7 @@ export async function revokeInvitation(memberId: string, orgId: string) {
     .from("organization_members")
     .delete()
     .eq("id", memberId)
+    .eq("org_id", orgId)
     .eq("status", "invited")
     .select("id");
 
@@ -159,7 +160,9 @@ export async function acceptInvitation(token: string): Promise<AcceptResult> {
     .maybeSingle();
   if (alreadyMember) throw new Error("You are already a member of this company");
 
-  const { error } = await service
+  // Bind the claim to the still-valid token + status so a resend/revoke/concurrent
+  // accept between the pre-checks above and this update can't activate on stale data.
+  const { data: claimed, error } = await service
     .from("organization_members")
     .update({
       user_id: user.id,
@@ -167,9 +170,14 @@ export async function acceptInvitation(token: string): Promise<AcceptResult> {
       invitation_token: null,
       token_expires_at: null,
     })
-    .eq("id", membership.id);
+    .eq("id", membership.id)
+    .eq("invitation_token", token)
+    .eq("status", "invited")
+    .select("id")
+    .maybeSingle();
 
   if (error) throw new Error(friendlyDbError(error));
+  if (!claimed) throw new Error("This invitation is invalid or has already been used");
 
   revalidatePath("/dashboard");
   return { orgId: membership.org_id };

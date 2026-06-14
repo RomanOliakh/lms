@@ -33,6 +33,7 @@ export default function RevokeInviteButton({
     <span className="inline-flex items-center gap-2">
       {error && <span className="text-xs text-danger">{error}</span>}
       <button
+        type="button"
         onClick={handleClick}
         disabled={isPending}
         title="Revoke invitation"

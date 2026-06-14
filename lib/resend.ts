@@ -17,7 +17,7 @@ export async function sendInviteEmail({
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.warn(
-      `[resend] RESEND_API_KEY not set — invitation email to ${to} skipped. Link: ${inviteUrl}`
+      "[resend] RESEND_API_KEY not set — invitation email skipped; use the UI invite-link fallback"
     );
     return { sent: false, skipped: true };
   }

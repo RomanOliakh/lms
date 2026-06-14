@@ -89,7 +89,9 @@ export default async function EditCompanyPage({
                   <th className="text-left px-4 py-3 text-n-600 font-medium">Email</th>
                   <th className="text-left px-4 py-3 text-n-600 font-medium">Role</th>
                   <th className="text-left px-4 py-3 text-n-600 font-medium">Status</th>
-                  <th className="px-4 py-3" />
+                  <th scope="col" className="px-4 py-3">
+                    <span className="sr-only">Actions</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>

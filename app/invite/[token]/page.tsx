@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { Button } from "@/components/ui/button";
 import AcceptInviteButton from "@/components/company/AcceptInviteButton";
 
 export const dynamic = "force-dynamic";
@@ -96,10 +95,11 @@ export default async function InvitePage({
           or create an account with that email to accept.
         </p>
         <div className="mt-6 space-y-3">
-          <Link href={`/login?next=${encodeURIComponent(nextPath)}`} className="block">
-            <Button className="w-full bg-lms-accent hover:bg-lms-accent-600 text-white">
-              Sign in
-            </Button>
+          <Link
+            href={`/login?next=${encodeURIComponent(nextPath)}`}
+            className="block w-full rounded-sm bg-lms-accent px-4 py-2 text-center text-sm font-medium text-white hover:bg-lms-accent-600"
+          >
+            Sign in
           </Link>
           <Link
             href={`/signup?next=${encodeURIComponent(nextPath)}`}
