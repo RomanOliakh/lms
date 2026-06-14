@@ -261,6 +261,7 @@ Notion status page: https://www.notion.so/366fbb2a781f81ff929ae0472e66fb08
 - Company report (per-employee completion % + quiz scores, CSV export) — main sellable artifact, not started
 - Awaiting partner answers to `docs/discovery-questions.md` (P0 blocks deeper data-model decisions)
 - Roadmap board: GitHub Project #3 — keep statuses updated as phases land
+- **Manual follow-ups (can't be automated from web sessions):** (1) move the «Employee invitations» card on GitHub Project #3 to Done/In Progress by hand — no `gh`/Projects MCP in web env; (2) browser invite→accept run-through before merging PR #10; (3) set `RESEND_API_KEY` + verified sender to enable real invite emails
 
 ## Verification checklist
 
