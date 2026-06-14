@@ -237,6 +237,17 @@ NEXT_PUBLIC_APP_URL=http://localhost:3001
 - ⚠️ Testing gotcha: impersonating via `set_config(...)` inside a CTE gives **phantom RLS leaks** — the plan is built while still `postgres` (BYPASSRLS). Test RLS only as separate statements: `begin; set local role authenticated; set local request.jwt.claims = '...'; <query>; rollback;`
 - ~~NOT yet done: browser verification of the UI~~ ✅ verified in browser 2026-06-11: list (seat usage 1/10, 1/5, status badges), create (cyrillic name «Тестова Компанія Ц» → slug `testova-kompaniia-ts`, seat_limit, redirect to edit), edit (rename, suspend → «Призупинена» badge; slug NOT overwritten on rename), delete with confirm → list updated, DB row gone (seeded A/B intact), members table renders real member (email/role/status). seat_limit still informational only (not enforced on insert — enforce when invitations land)
 
+### Employee invitations ✅ (2026-06-14) — PR #10 (open, `claude/tender-lamport-ns51tr`)
+- Platform/company admins invite employees by email from `/admin/companies/[id]`; invitee accepts a tokenized `/invite/[token]` link and becomes an active member.
+- Server actions `lib/actions/invitations.ts`: `inviteEmployee` (insert or resend = rotate token + refresh expiry/role) / `revokeInvitation` (delete scoped by `id` + `org_id` + `status='invited'`) / `acceptInvitation` (service-role claim; verifies token, 72h expiry, email match, unique(org_id,user_id); update bound to token+status to close stale-token races).
+- Email `lib/resend.ts`: best-effort — if `RESEND_API_KEY` unset, logs a generic skip (no PII/token) and the UI shows a copyable invite link, so the flow works today.
+- Service-role client `lib/supabase/service.ts`: only for the not-yet-member accept claim + invite read on `/invite/[token]`; never imported into client code.
+- UI: `InviteEmployeeForm` + `RevokeInviteButton` wired into the company edit page; accept page handles invalid / used / expired / wrong-account / signed-out states. login/signup carry a same-site `?next=` (open-redirect guarded both client and in `app/auth/confirm/route.ts`).
+- **Seat limit enforced server-side**: BEFORE INSERT trigger `private.enforce_seat_limit()` (migration `20260612200000`); `seat_limit = 0` = unlimited. Concurrency hardened by `20260614220000_seat_limit_lock.sql` (locks the org row `FOR UPDATE`). Both applied to live DB.
+- Migrations: `20260612200000_employee_invitations`, `20260614203658_invitation_tokens`, `20260614210000_drop_redundant_invite_token`, `20260614220000_seat_limit_lock`. `types/supabase.ts` reconstructed to match live DB.
+- Review: 8 CodeRabbit findings (open-redirect server-side, cross-org delete scope, accept race, seat-limit race, PII log + 3 a11y/markup) all addressed in commit `23e1ba4` and threads resolved.
+- ⚠️ NOT yet done: manual browser run of the invite → accept loop; real email send (blocked: `RESEND_API_KEY` empty — link fallback works meanwhile).
+
 ## Current sprint
 **B2B pivot in progress** (see Product scope above). Sprints 1–3 (B2C) ✅ done and verified 2026-06-07. **Phase 0 (tenancy) + company provisioning UI ✅ MERGED to main 2026-06-11** (PR #6: browser-verified, RLS isolation test passed, two code reviews — Claude + CodeRabbit — all findings addressed; follow-up migration `20260611150000` adds membership identity constraints).
 UI translated to English ✅ 2026-06-12 (`feat/english-ui`, PR #8): all user-visible strings in `app/**`, `components/**`, `lib/actions/**` + `<html lang="en">`; verified by Cyrillic-grep (0 matches), `tsc --noEmit`, and dev-server render of /login + /courses. DB course content stays as is; `lib/utils.ts` transliteration map untouched (functional). Platform is English-first with English content; docs stay as-is for now.
@@ -244,9 +255,10 @@ Dev environment fully configured: `.env.local` has all Supabase + Stripe keys se
 Notion status page: https://www.notion.so/366fbb2a781f81ff929ae0472e66fb08
 
 ### Next tasks
-- English UI translation — in progress (`feat/english-ui`, Zed)
-- Employee invitations (blocked: Resend key) · Bunny signed video URLs (blocked: Bunny credentials)
-- Enforce `seat_limit` server-side when invitations are built
+- Employee invitations ✅ code complete (PR #10, review addressed) — left to close out: manual browser invite→accept run + real email (blocked: `RESEND_API_KEY`); merge after the browser check
+- Course assignment to employees — in PR #9 (`feat/course-assignments`), awaiting merge/review
+- Bunny signed video URLs (blocked: Bunny credentials)
+- Company report (per-employee completion % + quiz scores, CSV export) — main sellable artifact, not started
 - Awaiting partner answers to `docs/discovery-questions.md` (P0 blocks deeper data-model decisions)
 - Roadmap board: GitHub Project #3 — keep statuses updated as phases land
 
