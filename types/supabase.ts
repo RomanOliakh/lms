@@ -14,6 +14,58 @@ export type Database = {
   }
   public: {
     Tables: {
+      course_assignments: {
+        Row: {
+          assigned_by: string | null
+          course_id: string
+          created_at: string
+          due_at: string | null
+          id: string
+          member_id: string
+          org_id: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          course_id: string
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          member_id: string
+          org_id: string
+        }
+        Update: {
+          assigned_by?: string | null
+          course_id?: string
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          member_id?: string
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_assignments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_assignments_member_id_org_id_fkey"
+            columns: ["member_id", "org_id"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["id", "org_id"]
+          },
+          {
+            foreignKeyName: "course_assignments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           created_at: string | null
@@ -197,28 +249,37 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          invitation_token: string | null
+          invite_token: string
           invited_email: string | null
           org_id: string
           org_role: string
           status: string
+          token_expires_at: string | null
           user_id: string | null
         }
         Insert: {
           created_at?: string
           id?: string
+          invitation_token?: string | null
+          invite_token?: string
           invited_email?: string | null
           org_id: string
           org_role?: string
           status?: string
+          token_expires_at?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string
           id?: string
+          invitation_token?: string | null
+          invite_token?: string
           invited_email?: string | null
           org_id?: string
           org_role?: string
           status?: string
+          token_expires_at?: string | null
           user_id?: string | null
         }
         Relationships: [

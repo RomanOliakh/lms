@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import CompanyForm from "@/components/company/CompanyForm";
 import DeleteCompanyButton from "@/components/company/DeleteCompanyButton";
+import InviteEmployeeForm from "@/components/company/InviteEmployeeForm";
+import RevokeInviteButton from "@/components/company/RevokeInviteButton";
 
 const ORG_ROLE_LABELS: Record<string, string> = {
   owner: "Owner",
@@ -69,10 +71,14 @@ export default async function EditCompanyPage({
           {organization.seat_limit > 0 ? ` / ${organization.seat_limit}` : ""})
         </h2>
 
+        <div className="mb-6">
+          <InviteEmployeeForm orgId={id} />
+        </div>
+
         {!members?.length ? (
           <div className="border border-dashed border-n-200 rounded-md p-8 text-center">
             <p className="text-sm text-n-400">
-              No employees yet. Email invitations are coming in the next phase.
+              No employees yet. Invite someone by email above.
             </p>
           </div>
         ) : (
@@ -83,6 +89,7 @@ export default async function EditCompanyPage({
                   <th className="text-left px-4 py-3 text-n-600 font-medium">Email</th>
                   <th className="text-left px-4 py-3 text-n-600 font-medium">Role</th>
                   <th className="text-left px-4 py-3 text-n-600 font-medium">Status</th>
+                  <th className="px-4 py-3" />
                 </tr>
               </thead>
               <tbody>
@@ -105,6 +112,11 @@ export default async function EditCompanyPage({
                       >
                         {member.status === "active" ? "Active" : "Invited"}
                       </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      {member.status === "invited" && (
+                        <RevokeInviteButton memberId={member.id} orgId={id} />
+                      )}
                     </td>
                   </tr>
                 ))}

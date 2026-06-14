@@ -1,15 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+// Only allow same-site absolute paths as a post-login destination — guards against
+// open-redirect via a crafted ?next=//evil.com.
+function safeNext(next: string | null): string {
+  if (next && next.startsWith("/") && !next.startsWith("//")) return next;
+  return "/dashboard";
+}
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = safeNext(searchParams.get("next"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -29,9 +38,12 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push(next);
     router.refresh();
   }
+
+  const signupHref =
+    next !== "/dashboard" ? `/signup?next=${encodeURIComponent(next)}` : "/signup";
 
   return (
     <div className="w-full max-w-sm">
@@ -89,11 +101,19 @@ export default function LoginPage() {
 
         <p className="mt-4 text-center text-sm text-n-400">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="text-lms-accent hover:text-lms-accent-600 font-medium">
+          <Link href={signupHref} className="text-lms-accent hover:text-lms-accent-600 font-medium">
             Sign up
           </Link>
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="w-full max-w-sm" />}>
+      <LoginForm />
+    </Suspense>
   );
 }
