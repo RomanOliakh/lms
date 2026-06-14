@@ -42,11 +42,16 @@ function SignupForm() {
     setLoading(true);
 
     const supabase = createClient();
+    // Carry a same-site ?next= through email confirmation so invitees land back on
+    // the accept page after verifying. /auth/confirm re-validates next server-side.
+    const confirmUrl = next
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/auth/confirm?next=${encodeURIComponent(next)}`
+      : `${process.env.NEXT_PUBLIC_APP_URL}/auth/confirm`;
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/confirm`,
+        emailRedirectTo: confirmUrl,
       },
     });
 
