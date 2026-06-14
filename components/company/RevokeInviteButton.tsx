@@ -31,7 +31,11 @@ export default function RevokeInviteButton({
 
   return (
     <span className="inline-flex items-center gap-2">
-      {error && <span className="text-xs text-danger">{error}</span>}
+      {error && (
+        <span className="text-xs text-danger" role="alert" aria-live="assertive">
+          {error}
+        </span>
+      )}
       <button
         type="button"
         onClick={handleClick}
