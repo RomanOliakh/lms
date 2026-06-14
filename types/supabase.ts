@@ -250,7 +250,6 @@ export type Database = {
           created_at: string
           id: string
           invitation_token: string | null
-          invite_token: string
           invited_email: string | null
           org_id: string
           org_role: string
@@ -262,7 +261,6 @@ export type Database = {
           created_at?: string
           id?: string
           invitation_token?: string | null
-          invite_token?: string
           invited_email?: string | null
           org_id: string
           org_role?: string
@@ -274,7 +272,6 @@ export type Database = {
           created_at?: string
           id?: string
           invitation_token?: string | null
-          invite_token?: string
           invited_email?: string | null
           org_id?: string
           org_role?: string
