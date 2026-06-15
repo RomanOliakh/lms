@@ -8,6 +8,8 @@ import CompanyForm from "@/components/company/CompanyForm";
 import DeleteCompanyButton from "@/components/company/DeleteCompanyButton";
 import InviteEmployeeForm from "@/components/company/InviteEmployeeForm";
 import RevokeInviteButton from "@/components/company/RevokeInviteButton";
+import AssignCourseForm from "@/components/company/AssignCourseForm";
+import UnassignButton from "@/components/company/UnassignButton";
 
 const ORG_ROLE_LABELS: Record<string, string> = {
   owner: "Owner",
@@ -38,6 +40,18 @@ export default async function EditCompanyPage({
     .select("*")
     .eq("org_id", id)
     .order("created_at");
+
+  const { data: courses } = await supabase
+    .from("courses")
+    .select("id, title")
+    .eq("is_published", true)
+    .order("title");
+
+  const { data: assignments } = await supabase
+    .from("course_assignments")
+    .select("id, due_at, created_at, courses(title), organization_members(invited_email)")
+    .eq("org_id", id)
+    .order("created_at", { ascending: false });
 
   return (
     <div className="p-8 max-w-2xl">
@@ -126,6 +140,57 @@ export default async function EditCompanyPage({
             </table>
           </div>
         )}
+      </section>
+
+      <Separator className="my-8 bg-n-200" />
+
+      <section>
+        <h2 className="text-sm font-semibold text-n-700 uppercase tracking-wide mb-4">
+          Course assignments
+        </h2>
+
+        {assignments && assignments.length > 0 && (
+          <div className="border border-n-200 rounded-md overflow-hidden shadow-1 mb-6">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-n-200 bg-n-50">
+                  <th className="text-left px-4 py-3 text-n-600 font-medium">Course</th>
+                  <th className="text-left px-4 py-3 text-n-600 font-medium">Employee</th>
+                  <th className="text-left px-4 py-3 text-n-600 font-medium">Deadline</th>
+                  <th className="px-4 py-3" />
+                </tr>
+              </thead>
+              <tbody>
+                {assignments.map((a) => {
+                  const course = a.courses as unknown as { title: string } | null;
+                  const member = a.organization_members as unknown as {
+                    invited_email: string | null;
+                  } | null;
+                  return (
+                    <tr key={a.id} className="border-b border-n-200 last:border-0">
+                      <td className="px-4 py-3 text-n-900">{course?.title ?? "—"}</td>
+                      <td className="px-4 py-3 text-n-700">{member?.invited_email ?? "—"}</td>
+                      <td className="px-4 py-3 text-n-700">
+                        {a.due_at ? new Date(a.due_at).toLocaleDateString("en-GB") : "—"}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <UnassignButton assignmentId={a.id} orgId={id} />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <AssignCourseForm
+          orgId={id}
+          courses={courses ?? []}
+          members={(members ?? [])
+            .filter((m) => m.status === "active" && m.user_id)
+            .map((m) => ({ id: m.id, email: m.invited_email ?? m.id }))}
+        />
       </section>
     </div>
   );

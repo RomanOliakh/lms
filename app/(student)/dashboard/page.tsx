@@ -15,13 +15,53 @@ export default async function DashboardPage() {
     .eq("user_id", user!.id)
     .order("enrolled_at", { ascending: false });
 
-  const courseIds = (enrollments ?? []).map((e) => e.course_id);
+  // B2B: courses assigned by the user's company
+  const { data: assignments } = await supabase
+    .from("course_assignments")
+    .select(
+      "course_id, due_at, courses(id, slug, title, thumbnail_url), organization_members!inner(user_id)"
+    )
+    .eq("organization_members.user_id", user!.id)
+    .order("created_at", { ascending: false });
+
+  type CourseInfo = {
+    id: string;
+    slug: string;
+    title: string;
+    thumbnail_url: string | null;
+  } | null;
+
+  // Merge: assignments first (they carry a deadline), then self-enrollments
+  const myCourses: { courseId: string; course: CourseInfo; dueAt: string | null; assigned: boolean }[] = [];
+  const seen = new Set<string>();
+  for (const a of assignments ?? []) {
+    if (seen.has(a.course_id)) continue;
+    seen.add(a.course_id);
+    myCourses.push({
+      courseId: a.course_id,
+      course: a.courses as unknown as CourseInfo,
+      dueAt: a.due_at,
+      assigned: true,
+    });
+  }
+  for (const e of enrollments ?? []) {
+    if (seen.has(e.course_id)) continue;
+    seen.add(e.course_id);
+    myCourses.push({
+      courseId: e.course_id,
+      course: e.courses as unknown as CourseInfo,
+      dueAt: null,
+      assigned: false,
+    });
+  }
+
+  const courseIds = myCourses.map((c) => c.courseId);
 
   type LessonRow = { id: string; slug: string };
   type ModuleRow = { course_id: string; lessons: LessonRow[] };
 
-  let progressByCourse: Record<string, { total: number; completed: number }> = {};
-  let continueSlugs: Record<string, string | null> = {};
+  const progressByCourse: Record<string, { total: number; completed: number }> = {};
+  const continueSlugs: Record<string, string | null> = {};
 
   if (courseIds.length > 0) {
     const { data: modules } = await supabase
@@ -46,9 +86,9 @@ export default async function DashboardPage() {
 
     // Group lessons by course in order
     const lessonsByCourse: Record<string, LessonRow[]> = {};
-    for (const module of typedModules) {
-      if (!lessonsByCourse[module.course_id]) lessonsByCourse[module.course_id] = [];
-      lessonsByCourse[module.course_id].push(...module.lessons);
+    for (const mod of typedModules) {
+      if (!lessonsByCourse[mod.course_id]) lessonsByCourse[mod.course_id] = [];
+      lessonsByCourse[mod.course_id].push(...mod.lessons);
     }
 
     for (const cid of courseIds) {
@@ -69,7 +109,7 @@ export default async function DashboardPage() {
         <p className="text-sm text-n-500 mt-0.5">{user?.email}</p>
       </div>
 
-      {!enrollments || enrollments.length === 0 ? (
+      {myCourses.length === 0 ? (
         <div className="text-center py-20 border border-n-200 rounded-md">
           <BookOpen className="w-8 h-8 text-n-300 mx-auto mb-3" />
           <p className="text-sm text-n-500">You are not enrolled in any course yet</p>
@@ -82,23 +122,18 @@ export default async function DashboardPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {enrollments.map((enrollment) => {
-            const course = enrollment.courses as unknown as {
-              id: string;
-              slug: string;
-              title: string;
-              thumbnail_url: string | null;
-            } | null;
+          {myCourses.map(({ courseId, course, dueAt, assigned }) => {
             if (!course) return null;
 
-            const prog = progressByCourse[enrollment.course_id] ?? { total: 0, completed: 0 };
+            const prog = progressByCourse[courseId] ?? { total: 0, completed: 0 };
             const pct = prog.total > 0 ? Math.round((prog.completed / prog.total) * 100) : 0;
-            const continueSlug = continueSlugs[enrollment.course_id];
+            const continueSlug = continueSlugs[courseId];
             const learnHref = continueSlug ? `/learn/${continueSlug}` : `/courses/${course.slug}`;
+            const overdue = dueAt && pct < 100 && new Date(dueAt) < new Date();
 
             return (
               <div
-                key={enrollment.course_id}
+                key={courseId}
                 className="flex gap-4 border border-n-200 rounded-md p-4 shadow-1"
               >
                 {course.thumbnail_url ? (
@@ -111,13 +146,25 @@ export default async function DashboardPage() {
                   <div className="w-20 h-16 bg-n-100 rounded-sm flex-shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-sm font-semibold text-n-900 truncate mb-1">{course.title}</h2>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-sm font-semibold text-n-900 truncate">{course.title}</h2>
+                    {assigned && (
+                      <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-xs bg-lms-accent-50 text-lms-accent flex-shrink-0">
+                        Assigned
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 mb-2">
                     <Progress value={pct} className="h-1.5 flex-1" />
                     <span className="text-xs text-n-500 flex-shrink-0">{pct}%</span>
                   </div>
                   <p className="text-xs text-n-400 mb-3">
                     {prog.completed} / {prog.total} lessons completed
+                    {dueAt && (
+                      <span className={overdue ? "text-danger font-semibold" : ""}>
+                        {" "}· due {new Date(dueAt).toLocaleDateString("en-GB")}
+                      </span>
+                    )}
                   </p>
                   <Link
                     href={learnHref}

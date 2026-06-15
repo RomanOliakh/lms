@@ -250,18 +250,19 @@ NEXT_PUBLIC_APP_URL=http://localhost:3001
 
 ## Current sprint
 **B2B pivot in progress** (see Product scope above). Sprints 1–3 (B2C) ✅ done and verified 2026-06-07. **Phase 0 (tenancy) + company provisioning UI ✅ MERGED to main 2026-06-11** (PR #6: browser-verified, RLS isolation test passed, two code reviews — Claude + CodeRabbit — all findings addressed; follow-up migration `20260611150000` adds membership identity constraints).
-UI translated to English ✅ 2026-06-12 (`feat/english-ui`, PR #8): all user-visible strings in `app/**`, `components/**`, `lib/actions/**` + `<html lang="en">`; verified by Cyrillic-grep (0 matches), `tsc --noEmit`, and dev-server render of /login + /courses. DB course content stays as is; `lib/utils.ts` transliteration map untouched (functional). Platform is English-first with English content; docs stay as-is for now.
+UI translated to English ✅ MERGED to main 2026-06-12 (`feat/english-ui`, PR #8): all user-visible strings in `app/**`, `components/**`, `lib/actions/**` + `<html lang="en">`; verified by Cyrillic-grep (0 matches), `tsc --noEmit`, and dev-server render of /login + /courses. DB course content stays as is; `lib/utils.ts` transliteration map untouched (functional). Platform is English-first with English content; docs stay as-is for now.
+**Course assignments** built 2026-06-12 (`feat/course-assignments`): `course_assignments` table (org_id + member_id + course_id, optional `due_at`; composite FK (member_id, org_id) → organization_members guarantees member belongs to org) + RLS (platform admin all / company_admin own org / learner reads own via new `private.current_user_member_ids()`); migration `20260612190000`, applied via MCP, types regenerated. Assign/unassign UI on `/admin/companies/[id]` (course select + employee checkboxes + optional deadline; idempotent upsert), learner dashboard shows assigned courses with "Assigned" badge + due date (overdue in red), `/learn/*` access granted by assignment OR enrollment. **Live RLS test passed** (learner B sees own = 1; admin A sees org B = 0; cross-org insert → 42501; own-org insert OK). **Browser-verified 2026-06-12**: assign with/without deadline → row in table + «Course assigned ✓», unassign with confirm, learner dashboard shows ASSIGNED badge + due date + progress, `/learn/*` opens WITHOUT enrollment via assignment, mark-complete → 100% on dashboard (test progress reverted; assignment Ai Test Course → learner B left in DB). Learner login for testing: admin-API magic link → session cookie (no password needed); /login does NOT pick up implicit-flow hash tokens — known gap, same as password reset.
 Dev environment fully configured: `.env.local` has all Supabase + Stripe keys set. Dev server runs on port 3001. Supabase Site URL set to :3001. Stripe account business name set ("LMS Test", test mode). `BUNNY_*` and `RESEND_API_KEY` are **empty** — v1 blockers.
 Notion status page: https://www.notion.so/366fbb2a781f81ff929ae0472e66fb08
 
 ### Next tasks
-- Employee invitations ✅ code complete (PR #10, review addressed) — left to close out: manual browser invite→accept run + real email (blocked: `RESEND_API_KEY`); merge after the browser check
-- Course assignment to employees — in PR #9 (`feat/course-assignments`), awaiting merge/review
+- Employee invitations (PR #10) + course assignments (PR #9) ✅ **MERGED to main 2026-06-14**
+- Company report: per-employee completion % + quiz scores, CSV export (main sellable artifact — now unblocked by assignments) — next up, not started
+- PDF completion certificate (v1 IN scope) — not started
 - Bunny signed video URLs (blocked: Bunny credentials)
-- Company report (per-employee completion % + quiz scores, CSV export) — main sellable artifact, not started
 - Awaiting partner answers to `docs/discovery-questions.md` (P0 blocks deeper data-model decisions)
 - Roadmap board: GitHub Project #3 — keep statuses updated as phases land
-- **Manual follow-ups (can't be automated from web sessions):** (1) move the «Employee invitations» card on GitHub Project #3 to Done/In Progress by hand — no `gh`/Projects MCP in web env; (2) browser invite→accept run-through before merging PR #10; (3) set `RESEND_API_KEY` + verified sender to enable real invite emails
+- **Manual follow-ups (can't be automated from web sessions):** (1) move the «Employee invitations» + «Course assignments» cards on GitHub Project #3 to Done by hand — no `gh`/Projects MCP in web env; (2) set `RESEND_API_KEY` + verified sender to enable real invite emails
 
 ## Verification checklist
 
