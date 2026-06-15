@@ -248,6 +248,13 @@ NEXT_PUBLIC_APP_URL=http://localhost:3001
 - Review: 8 CodeRabbit findings (open-redirect server-side, cross-org delete scope, accept race, seat-limit race, PII log + 3 a11y/markup) all addressed in commit `23e1ba4` and threads resolved.
 - ⚠️ NOT yet done: manual browser run of the invite → accept loop; real email send (blocked: `RESEND_API_KEY` empty — link fallback works meanwhile).
 
+### Company report (CSV) ✅ (2026-06-15) — PR #11 MERGED to main
+- Main sellable artifact: per-employee **completion % + quiz scores** across **company-assigned courses only** (not self-enrollments), with **CSV export**.
+- `quiz_attempts` table + RLS (migrations `20260615060000` + `20260615100000` CHECK `total>0`/`0≤score≤total`). Scores were never persisted before — `/api/quiz/submit` now upserts the latest attempt per `(user_id, lesson_id)`. RLS: learner own (`qa_self_all`) / platform admin all / company admin reads members' attempts via private helper `org_admin_member_user_ids()`.
+- `lib/reports/company-report.ts` (shared aggregation + CSV builder, UTC dates, surfaces query errors), report page `/admin/companies/[id]/report` (table + Download CSV + per-row certificate link), export route `app/api/companies/[id]/report/export` (RLS-scoped, 403/500 split).
+- 6 CodeRabbit findings addressed (route under `app/api/**`, `submitted_at` on upsert, error surfacing, UTC dates, CHECK constraints, 500-vs-403) — all threads resolved.
+- **Live RLS test passed (2026-06-15)**: one seeded attempt per org → company-admin of A sees only A's (`total_visible=1`, `sees_orgB=0`); run as `set local role authenticated` + jwt (no CTE phantom-leak), inside `begin/rollback` (no leftover rows). Executed from **local Claude Code + Supabase MCP** — web-session Supabase MCP writes/reads are approval-gated and can't run from the cloud session.
+
 ## Current sprint
 **B2B pivot in progress** (see Product scope above). Sprints 1–3 (B2C) ✅ done and verified 2026-06-07. **Phase 0 (tenancy) + company provisioning UI ✅ MERGED to main 2026-06-11** (PR #6: browser-verified, RLS isolation test passed, two code reviews — Claude + CodeRabbit — all findings addressed; follow-up migration `20260611150000` adds membership identity constraints).
 UI translated to English ✅ MERGED to main 2026-06-12 (`feat/english-ui`, PR #8): all user-visible strings in `app/**`, `components/**`, `lib/actions/**` + `<html lang="en">`; verified by Cyrillic-grep (0 matches), `tsc --noEmit`, and dev-server render of /login + /courses. DB course content stays as is; `lib/utils.ts` transliteration map untouched (functional). Platform is English-first with English content; docs stay as-is for now.
@@ -257,12 +264,12 @@ Notion status page: https://www.notion.so/366fbb2a781f81ff929ae0472e66fb08
 
 ### Next tasks
 - Employee invitations (PR #10) + course assignments (PR #9) ✅ **MERGED to main 2026-06-14**
-- Company report: per-employee completion % + quiz scores, CSV export (main sellable artifact — now unblocked by assignments) — next up, not started
-- PDF completion certificate (v1 IN scope) — not started
-- Bunny signed video URLs (blocked: Bunny credentials)
+- Company report + CSV (PR #11) ✅ **MERGED to main 2026-06-15**; `quiz_attempts` RLS verified live 2026-06-15
+- PDF completion certificate — **PR #12 open** (`feat/completion-certificate`): `/api/certificate` (self / platform admin / company admin), `@react-pdf/renderer`, name from `profiles.full_name` (no migration — column pre-existed since sprint 1) editable on dashboard, certificate links on dashboard + report. Build clean; awaiting CodeRabbit review/merge + runtime PDF check.
+- **v1 IN scope: feature-complete after PR #12 merges**, except Bunny video (blocked: Bunny credentials) and real invite email (blocked: `RESEND_API_KEY`).
 - Awaiting partner answers to `docs/discovery-questions.md` (P0 blocks deeper data-model decisions)
 - Roadmap board: GitHub Project #3 — keep statuses updated as phases land
-- **Manual follow-ups (can't be automated from web sessions):** (1) move the «Employee invitations» + «Course assignments» cards on GitHub Project #3 to Done by hand — no `gh`/Projects MCP in web env; (2) set `RESEND_API_KEY` + verified sender to enable real invite emails
+- **Manual follow-ups (can't be automated from web sessions):** (1) move «Employee invitations», «Course assignments», «Company report» (+ «PDF certificate» once merged) cards on GitHub Project #3 by hand — no `gh`/Projects MCP in web env; (2) set `RESEND_API_KEY` + verified sender for real invite emails
 
 ## Verification checklist
 

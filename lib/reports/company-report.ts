@@ -5,6 +5,8 @@ import type { Database } from "@/types/supabase";
 // courses the company assigned to the employee (B2B scope — not self-enrollments).
 export type CompanyReportRow = {
   email: string;
+  userId: string | null;
+  courseId: string;
   courseTitle: string;
   dueAt: string | null;
   completedLessons: number;
@@ -150,6 +152,8 @@ export async function buildCompanyReport(
 
     return {
       email: member?.invited_email ?? "—",
+      userId: userId,
+      courseId: a.course_id,
       courseTitle: course?.title ?? "—",
       dueAt: a.due_at,
       completedLessons,
