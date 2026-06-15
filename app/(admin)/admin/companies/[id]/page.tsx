@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, BarChart3 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -63,7 +63,16 @@ export default async function EditCompanyPage({
           <ChevronLeft className="w-4 h-4" />
           Back to companies
         </Link>
-        <DeleteCompanyButton organizationId={id} />
+        <div className="flex items-center gap-4">
+          <Link
+            href={`/admin/companies/${id}/report`}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-lms-accent hover:text-lms-accent-600"
+          >
+            <BarChart3 className="w-4 h-4" />
+            Training report
+          </Link>
+          <DeleteCompanyButton organizationId={id} />
+        </div>
       </div>
 
       <h1 className="text-xl font-semibold text-n-900 tracking-tight mb-6">
