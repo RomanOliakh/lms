@@ -32,7 +32,7 @@ export default function CompanySidebar({ companyName }: { companyName: string })
         <span className="text-xs text-n-400">Company workspace</span>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-0.5">
+      <nav className="flex-1 px-3 py-4 space-y-1">
         {navItems.map(({ href, label, icon: Icon, exact }) => {
           const active = exact ? pathname === href : pathname.startsWith(href);
           return (

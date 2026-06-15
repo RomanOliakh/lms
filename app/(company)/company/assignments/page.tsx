@@ -76,8 +76,8 @@ export default async function CompanyAssignmentsPage() {
         orgId={org.id}
         courses={courses ?? []}
         members={(members ?? [])
-          .filter((m) => m.status === "active" && m.user_id)
-          .map((m) => ({ id: m.id, email: m.invited_email ?? m.id }))}
+          .filter((m) => m.status === "active" && m.user_id && m.invited_email)
+          .map((m) => ({ id: m.id, email: m.invited_email as string }))}
       />
     </div>
   );

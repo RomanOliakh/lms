@@ -22,7 +22,7 @@ export default async function CompanyEmployeesPage() {
 
   const { data: members } = await supabase
     .from("organization_members")
-    .select("*")
+    .select("id, invited_email, org_role, status")
     .eq("org_id", org.id)
     .order("created_at");
 

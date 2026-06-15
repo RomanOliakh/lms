@@ -11,14 +11,21 @@ export default async function CompanyDashboardPage() {
   if (!org) redirect("/dashboard");
   const supabase = await createClient();
 
-  const { data: members } = await supabase
-    .from("organization_members")
-    .select("status")
-    .eq("org_id", org.id);
-  const { count: assignmentCount } = await supabase
-    .from("course_assignments")
-    .select("id", { count: "exact", head: true })
-    .eq("org_id", org.id);
+  const [
+    { data: members, error: membersError },
+    { count: assignmentCount, error: assignmentsError },
+  ] = await Promise.all([
+    supabase.from("organization_members").select("status").eq("org_id", org.id),
+    supabase
+      .from("course_assignments")
+      .select("id", { count: "exact", head: true })
+      .eq("org_id", org.id),
+  ]);
+  if (membersError || assignmentsError) {
+    throw new Error(
+      membersError?.message ?? assignmentsError?.message ?? "Failed to load dashboard metrics"
+    );
+  }
 
   const total = members?.length ?? 0;
   const active = (members ?? []).filter((m) => m.status === "active").length;
