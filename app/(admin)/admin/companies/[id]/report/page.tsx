@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { buildCompanyReport } from "@/lib/reports/company-report";
+import { buildCompanyReport, formatDueDate } from "@/lib/reports/company-report";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +36,7 @@ export default async function CompanyReportPage({
         </Link>
         {rows.length > 0 && (
           <Link
-            href={`/admin/companies/${id}/report/export`}
+            href={`/api/companies/${id}/report/export`}
             prefetch={false}
             className="inline-flex items-center gap-1.5 rounded-sm bg-lms-accent px-3 py-2 text-sm font-medium text-white hover:bg-lms-accent-600"
           >
@@ -77,7 +77,7 @@ export default async function CompanyReportPage({
                   <td className="px-4 py-3 text-n-900">{r.email}</td>
                   <td className="px-4 py-3 text-n-700">{r.courseTitle}</td>
                   <td className="px-4 py-3 text-n-700">
-                    {r.dueAt ? new Date(r.dueAt).toLocaleDateString("en-GB") : "—"}
+                    {r.dueAt ? formatDueDate(r.dueAt) : "—"}
                   </td>
                   <td className="px-4 py-3 text-n-700">
                     {r.completionPct}%{" "}

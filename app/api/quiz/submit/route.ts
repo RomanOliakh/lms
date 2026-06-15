@@ -62,7 +62,13 @@ export async function POST(request: NextRequest) {
   const { error: attemptError } = await supabase
     .from("quiz_attempts")
     .upsert(
-      { user_id: user.id, lesson_id, score: correct, total: questions.length },
+      {
+        user_id: user.id,
+        lesson_id,
+        score: correct,
+        total: questions.length,
+        submitted_at: new Date().toISOString(),
+      },
       { onConflict: "user_id,lesson_id" }
     );
   if (attemptError) {

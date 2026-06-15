@@ -21,13 +21,16 @@ export async function buildCompanyReport(
   supabase: SupabaseClient<Database>,
   orgId: string
 ): Promise<CompanyReportRow[]> {
-  const { data: assignments } = await supabase
+  const { data: assignments, error: assignmentsError } = await supabase
     .from("course_assignments")
     .select(
       "member_id, course_id, due_at, organization_members(user_id, invited_email), courses(title)"
     )
     .eq("org_id", orgId);
 
+  if (assignmentsError) {
+    throw new Error(`Failed to load course assignments: ${assignmentsError.message}`);
+  }
   if (!assignments || assignments.length === 0) return [];
 
   const courseIds = [...new Set(assignments.map((a) => a.course_id))];
@@ -44,19 +47,21 @@ export async function buildCompanyReport(
   ];
 
   // course → lessons (via modules)
-  const { data: modules } = await supabase
+  const { data: modules, error: modulesError } = await supabase
     .from("modules")
     .select("id, course_id")
     .in("course_id", courseIds);
+  if (modulesError) throw new Error(`Failed to load modules: ${modulesError.message}`);
   const moduleIds = (modules ?? []).map((m) => m.id);
   const moduleToCourse = new Map((modules ?? []).map((m) => [m.id, m.course_id]));
 
   let lessons: { id: string; module_id: string }[] = [];
   if (moduleIds.length) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("lessons")
       .select("id, module_id")
       .in("module_id", moduleIds);
+    if (error) throw new Error(`Failed to load lessons: ${error.message}`);
     lessons = data ?? [];
   }
 
@@ -72,22 +77,24 @@ export async function buildCompanyReport(
   // which lessons carry a quiz
   const quizLessonSet = new Set<string>();
   if (allLessonIds.length) {
-    const { data: qq } = await supabase
+    const { data: qq, error: qqError } = await supabase
       .from("quiz_questions")
       .select("lesson_id")
       .in("lesson_id", allLessonIds);
+    if (qqError) throw new Error(`Failed to load quiz questions: ${qqError.message}`);
     for (const q of qq ?? []) quizLessonSet.add(q.lesson_id);
   }
 
   // completed lessons per user
   const completedByUser = new Map<string, Set<string>>();
   if (userIds.length && allLessonIds.length) {
-    const { data: prog } = await supabase
+    const { data: prog, error: progError } = await supabase
       .from("lesson_progress")
       .select("user_id, lesson_id")
       .in("user_id", userIds)
       .in("lesson_id", allLessonIds)
       .eq("completed", true);
+    if (progError) throw new Error(`Failed to load lesson progress: ${progError.message}`);
     for (const p of prog ?? []) {
       if (!completedByUser.has(p.user_id)) completedByUser.set(p.user_id, new Set());
       completedByUser.get(p.user_id)!.add(p.lesson_id);
@@ -97,11 +104,12 @@ export async function buildCompanyReport(
   // quiz attempts per user → lesson
   const attemptsByUser = new Map<string, Map<string, { score: number; total: number }>>();
   if (userIds.length && allLessonIds.length) {
-    const { data: attempts } = await supabase
+    const { data: attempts, error: attemptsError } = await supabase
       .from("quiz_attempts")
       .select("user_id, lesson_id, score, total")
       .in("user_id", userIds)
       .in("lesson_id", allLessonIds);
+    if (attemptsError) throw new Error(`Failed to load quiz attempts: ${attemptsError.message}`);
     for (const at of attempts ?? []) {
       if (!attemptsByUser.has(at.user_id)) attemptsByUser.set(at.user_id, new Map());
       attemptsByUser.get(at.user_id)!.set(at.lesson_id, { score: at.score, total: at.total });
@@ -159,6 +167,16 @@ export async function buildCompanyReport(
   return rows;
 }
 
+// UTC-stable dd/mm/yyyy — avoids the calendar-day shift that local-timezone
+// formatting causes for timestamps near midnight.
+export function formatDueDate(dueAt: string | null): string {
+  if (!dueAt) return "";
+  const d = new Date(dueAt);
+  const dd = String(d.getUTCDate()).padStart(2, "0");
+  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+  return `${dd}/${mm}/${d.getUTCFullYear()}`;
+}
+
 // RFC-4180-ish CSV: quote every field, double internal quotes.
 export function reportToCsv(rows: CompanyReportRow[]): string {
   const header = [
@@ -180,7 +198,7 @@ export function reportToCsv(rows: CompanyReportRow[]): string {
       [
         r.email,
         r.courseTitle,
-        r.dueAt ? new Date(r.dueAt).toLocaleDateString("en-GB") : "",
+        formatDueDate(r.dueAt),
         r.completionPct,
         r.completedLessons,
         r.totalLessons,

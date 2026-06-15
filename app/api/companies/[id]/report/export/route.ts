@@ -16,18 +16,21 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // RLS scopes both queries to orgs the caller may read; a non-admin simply gets
-  // an empty report rather than another org's data.
+  // Authorize via RLS: the org row is only visible to a platform admin or a member
+  // of that org, so a missing row means the caller may not read this org's report.
   const { data: organization } = await supabase
     .from("organizations")
     .select("slug")
     .eq("id", id)
     .maybeSingle();
+  if (!organization) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const rows = await buildCompanyReport(supabase, id);
   const csv = reportToCsv(rows);
   const date = new Date().toISOString().slice(0, 10);
-  const filename = `report-${organization?.slug ?? id}-${date}.csv`;
+  const filename = `report-${organization.slug ?? id}-${date}.csv`;
 
   return new NextResponse(csv, {
     headers: {
