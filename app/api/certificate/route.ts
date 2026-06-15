@@ -27,7 +27,13 @@ export async function GET(request: NextRequest) {
   // A learner may only download their own certificate; an admin may download a
   // certificate for an employee in an org they administer (platform admin: any).
   if (targetUserId !== user.id) {
-    const authorized = await callerCanIssueFor(supabase, service, user.id, targetUserId);
+    const authorized = await callerCanIssueFor(
+      supabase,
+      service,
+      user.id,
+      targetUserId,
+      courseId
+    );
     if (!authorized) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
@@ -57,7 +63,8 @@ async function callerCanIssueFor(
   supabase: Awaited<ReturnType<typeof createClient>>,
   service: ReturnType<typeof createServiceClient>,
   callerId: string,
-  targetUserId: string
+  targetUserId: string,
+  courseId: string
 ): Promise<boolean> {
   // Platform admin → full access.
   const { data: profile } = await supabase
@@ -67,7 +74,8 @@ async function callerCanIssueFor(
     .maybeSingle();
   if (profile?.role === "admin") return true;
 
-  // Company admin → only employees in orgs they administer.
+  // Company admin → only for an active employee who was ASSIGNED this exact course
+  // in an org the caller administers (keeps delegation inside the report scope).
   const { data: adminOrgs } = await service
     .from("organization_members")
     .select("org_id")
@@ -76,13 +84,17 @@ async function callerCanIssueFor(
     .in("org_role", ["company_admin", "owner"]);
   if (!adminOrgs?.length) return false;
 
-  const adminOrgIds = new Set(adminOrgs.map((o) => o.org_id));
-  const { data: targetOrgs } = await service
-    .from("organization_members")
-    .select("org_id")
-    .eq("user_id", targetUserId);
+  const adminOrgIds = adminOrgs.map((o) => o.org_id);
+  const { data: scopedAssignments } = await service
+    .from("course_assignments")
+    .select("org_id, organization_members!inner(user_id, status)")
+    .eq("course_id", courseId)
+    .eq("organization_members.user_id", targetUserId)
+    .eq("organization_members.status", "active")
+    .in("org_id", adminOrgIds)
+    .limit(1);
 
-  return (targetOrgs ?? []).some((o) => adminOrgIds.has(o.org_id));
+  return Boolean(scopedAssignments?.length);
 }
 
 function slugify(value: string): string {

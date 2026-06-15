@@ -61,25 +61,31 @@ export async function getCertificateData(
     .at(-1);
   const completedOn = formatLongDate(completedAt ?? new Date().toISOString());
 
-  // Name: profile full_name, fall back to email.
-  const { data: profile } = await service
+  // Name: profile full_name, fall back to email. Fail closed on query errors —
+  // keep fallbacks only for genuinely missing rows.
+  const { data: profile, error: profileError } = await service
     .from("profiles")
     .select("full_name")
     .eq("id", userId)
     .maybeSingle();
+  if (profileError) throw new Error(`Failed to load profile: ${profileError.message}`);
 
-  const { data: authUser } = await service.auth.admin.getUserById(userId);
+  const { data: authUser, error: authUserError } = await service.auth.admin.getUserById(userId);
+  if (authUserError) throw new Error(`Failed to load auth user: ${authUserError.message}`);
   const email = authUser?.user?.email ?? "";
   const name = profile?.full_name?.trim() || email || "Learner";
 
   // Company that assigned this course to the user.
-  const { data: assignment } = await service
+  const { data: assignment, error: assignmentError } = await service
     .from("course_assignments")
     .select("organizations(name), organization_members!inner(user_id)")
     .eq("course_id", courseId)
     .eq("organization_members.user_id", userId)
     .limit(1)
     .maybeSingle();
+  if (assignmentError) {
+    throw new Error(`Failed to load certificate organization: ${assignmentError.message}`);
+  }
   const companyName =
     (assignment?.organizations as unknown as { name: string } | null)?.name ?? "your company";
 

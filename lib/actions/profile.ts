@@ -13,10 +13,11 @@ export async function updateProfileName(fullName: string) {
   if (!user) throw new Error("Not authenticated");
 
   const trimmed = fullName.trim().slice(0, 120);
+  // Upsert (not update) so the write can't silently no-op if the profile row is
+  // somehow missing; RLS still scopes it to the caller's own id.
   const { error } = await supabase
     .from("profiles")
-    .update({ full_name: trimmed || null })
-    .eq("id", user.id);
+    .upsert({ id: user.id, full_name: trimmed || null }, { onConflict: "id" });
   if (error) throw new Error(error.message);
 
   revalidatePath("/dashboard");

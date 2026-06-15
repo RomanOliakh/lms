@@ -37,7 +37,10 @@ export default function ProfileNameForm({ initialName }: { initialName: string }
         <Input
           id="full_name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value);
+            setSaved(false);
+          }}
           placeholder="Your full name"
           className="h-9 w-64 border-n-200 focus-visible:ring-lms-accent"
         />
