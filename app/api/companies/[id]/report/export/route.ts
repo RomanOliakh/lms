@@ -18,11 +18,14 @@ export async function GET(
 
   // Authorize via RLS: the org row is only visible to a platform admin or a member
   // of that org, so a missing row means the caller may not read this org's report.
-  const { data: organization } = await supabase
+  const { data: organization, error: organizationError } = await supabase
     .from("organizations")
     .select("slug")
     .eq("id", id)
     .maybeSingle();
+  if (organizationError) {
+    return NextResponse.json({ error: "Failed to load organization" }, { status: 500 });
+  }
   if (!organization) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
