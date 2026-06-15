@@ -1,13 +1,20 @@
 import Link from "next/link";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Award } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Progress } from "@/components/ui/progress";
+import ProfileNameForm from "@/components/profile/ProfileNameForm";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user!.id)
+    .maybeSingle();
 
   const { data: enrollments } = await supabase
     .from("enrollments")
@@ -107,6 +114,9 @@ export default async function DashboardPage() {
       <div className="mb-8">
         <h1 className="text-xl font-semibold text-n-900 tracking-tight">My courses</h1>
         <p className="text-sm text-n-500 mt-0.5">{user?.email}</p>
+        <div className="mt-4">
+          <ProfileNameForm initialName={profile?.full_name ?? ""} />
+        </div>
       </div>
 
       {myCourses.length === 0 ? (
@@ -166,12 +176,23 @@ export default async function DashboardPage() {
                       </span>
                     )}
                   </p>
-                  <Link
-                    href={learnHref}
-                    className="inline-flex items-center px-3 py-1.5 rounded-sm bg-lms-accent text-white text-xs font-semibold hover:bg-lms-accent-600 transition-colors"
-                  >
-                    {pct === 100 ? "Review" : "Continue →"}
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={learnHref}
+                      className="inline-flex items-center px-3 py-1.5 rounded-sm bg-lms-accent text-white text-xs font-semibold hover:bg-lms-accent-600 transition-colors"
+                    >
+                      {pct === 100 ? "Review" : "Continue →"}
+                    </Link>
+                    {pct === 100 && (
+                      <a
+                        href={`/api/certificate?courseId=${courseId}`}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-sm border border-n-200 text-n-700 text-xs font-semibold hover:bg-n-50 transition-colors"
+                      >
+                        <Award className="w-3.5 h-3.5" />
+                        Certificate
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             );

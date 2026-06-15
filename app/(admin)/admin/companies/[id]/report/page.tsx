@@ -69,6 +69,7 @@ export default async function CompanyReportPage({
                 <th className="text-left px-4 py-3 text-n-600 font-medium">Deadline</th>
                 <th className="text-left px-4 py-3 text-n-600 font-medium">Completion</th>
                 <th className="text-left px-4 py-3 text-n-600 font-medium">Quiz score</th>
+                <th className="text-left px-4 py-3 text-n-600 font-medium">Certificate</th>
               </tr>
             </thead>
             <tbody>
@@ -97,6 +98,18 @@ export default async function CompanyReportPage({
                           ({r.quizzesTaken}/{r.quizzesTotal})
                         </span>
                       </>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {r.completionPct === 100 && r.userId ? (
+                      <a
+                        href={`/api/certificate?courseId=${r.courseId}&userId=${r.userId}`}
+                        className="text-lms-accent hover:underline"
+                      >
+                        PDF
+                      </a>
+                    ) : (
+                      <span className="text-n-400">—</span>
                     )}
                   </td>
                 </tr>
