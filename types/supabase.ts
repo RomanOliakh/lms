@@ -249,28 +249,34 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          invitation_token: string | null
           invited_email: string | null
           org_id: string
           org_role: string
           status: string
+          token_expires_at: string | null
           user_id: string | null
         }
         Insert: {
           created_at?: string
           id?: string
+          invitation_token?: string | null
           invited_email?: string | null
           org_id: string
           org_role?: string
           status?: string
+          token_expires_at?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string
           id?: string
+          invitation_token?: string | null
           invited_email?: string | null
           org_id?: string
           org_role?: string
           status?: string
+          token_expires_at?: string | null
           user_id?: string | null
         }
         Relationships: [

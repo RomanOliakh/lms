@@ -1,13 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 
-export default function SignupPage() {
+function safeNext(next: string | null): string | null {
+  if (next && next.startsWith("/") && !next.startsWith("//")) return next;
+  return null;
+}
+
+function SignupForm() {
+  const searchParams = useSearchParams();
+  const next = safeNext(searchParams.get("next"));
+  const loginHref = next ? `/login?next=${encodeURIComponent(next)}` : "/login";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -32,11 +42,16 @@ export default function SignupPage() {
     setLoading(true);
 
     const supabase = createClient();
+    // Carry a same-site ?next= through email confirmation so invitees land back on
+    // the accept page after verifying. /auth/confirm re-validates next server-side.
+    const confirmUrl = next
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/auth/confirm?next=${encodeURIComponent(next)}`
+      : `${process.env.NEXT_PUBLIC_APP_URL}/auth/confirm`;
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/confirm`,
+        emailRedirectTo: confirmUrl,
       },
     });
 
@@ -65,7 +80,7 @@ export default function SignupPage() {
             Follow the link in the email to activate your account.
           </p>
           <Link
-            href="/login"
+            href={loginHref}
             className="mt-6 inline-block text-sm text-lms-accent hover:text-lms-accent-600 font-medium"
           >
             Back to sign in
@@ -147,11 +162,19 @@ export default function SignupPage() {
 
         <p className="mt-4 text-center text-sm text-n-400">
           Already have an account?{" "}
-          <Link href="/login" className="text-lms-accent hover:text-lms-accent-600 font-medium">
+          <Link href={loginHref} className="text-lms-accent hover:text-lms-accent-600 font-medium">
             Sign in
           </Link>
         </p>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="w-full max-w-sm" />}>
+      <SignupForm />
+    </Suspense>
   );
 }
