@@ -34,7 +34,8 @@ export async function proxy(request: NextRequest) {
   const isProtected =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/learn") ||
-    pathname.startsWith("/admin");
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/company");
 
   const isAuthPage =
     pathname.startsWith("/login") || pathname.startsWith("/signup");
@@ -52,6 +53,22 @@ export async function proxy(request: NextRequest) {
       .eq("id", user.id)
       .maybeSingle();
     if (error || profile?.role !== "admin") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
+    }
+  }
+
+  if (pathname.startsWith("/company") && user) {
+    const { data: adminMembership } = await supabase
+      .from("organization_members")
+      .select("org_id")
+      .eq("user_id", user.id)
+      .eq("status", "active")
+      .in("org_role", ["company_admin", "owner"])
+      .limit(1)
+      .maybeSingle();
+    if (!adminMembership) {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);
