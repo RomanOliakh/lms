@@ -46,3 +46,6 @@ next-env.d.ts
 .agents/
 .claude/skills/*
 !.claude/skills/wrap-up/
+
+# ShipStudio metadata
+.shipstudio/
