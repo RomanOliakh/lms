@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { BookOpen, Building2, Users, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import Wordmark from "@/components/brand/Wordmark";
 
 const navItems = [
   { href: "/admin/companies", label: "Companies", icon: Building2 },
@@ -24,8 +25,9 @@ export default function AdminSidebar() {
 
   return (
     <aside className="flex flex-col w-[var(--sidebar-w)] h-full border-r border-n-200 bg-n-50 shrink-0">
-      <div className="flex items-center h-[var(--header-h)] px-5 border-b border-n-200">
-        <span className="text-sm font-semibold text-n-900 tracking-tight">LMS Admin</span>
+      <div className="flex items-center gap-2 h-[var(--header-h)] px-5 border-b border-n-200">
+        <Wordmark />
+        <span className="text-xs text-n-400">Admin</span>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-0.5">

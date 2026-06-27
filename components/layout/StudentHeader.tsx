@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { BookOpen, LayoutDashboard, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import Wordmark from "@/components/brand/Wordmark";
 
 export default function StudentHeader({ userEmail }: { userEmail: string }) {
   const pathname = usePathname();
@@ -18,11 +19,8 @@ export default function StudentHeader({ userEmail }: { userEmail: string }) {
 
   return (
     <header className="h-[var(--header-h)] border-b border-n-200 bg-n-0 flex items-center px-6 gap-6 shrink-0">
-      <Link
-        href="/courses"
-        className="text-sm font-semibold text-n-900 tracking-tight mr-2"
-      >
-        LMS
+      <Link href="/courses" className="mr-2">
+        <Wordmark />
       </Link>
 
       <nav className="flex items-center gap-1">
