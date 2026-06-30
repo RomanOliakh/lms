@@ -1,177 +1,216 @@
-import { createServiceClient } from "@/lib/supabase/service";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/types/supabase";
 
-// Per-employee, per-assigned-course completion. Computed with the service-role
-// client because RLS restricts lesson_progress to its own owner — a company
-// report legitimately reads every assigned member's progress. The reading is
-// always scoped to a single org's members, and the only caller (the /admin
-// report page + export route) is gated to platform admins by proxy.ts.
-
-export type ReportStatus =
-  | "completed"
-  | "in_progress"
-  | "not_started"
-  | "overdue";
-
-export const REPORT_STATUS_LABELS: Record<ReportStatus, string> = {
-  completed: "Completed",
-  in_progress: "In progress",
-  not_started: "Not started",
-  overdue: "Overdue",
-};
-
+// One row per (employee × assigned course). Completion is measured ONLY across
+// courses the company assigned to the employee (B2B scope — not self-enrollments).
 export type CompanyReportRow = {
-  employeeEmail: string;
-  employeeStatus: string; // active | invited
+  email: string;
+  userId: string | null;
+  courseId: string;
   courseTitle: string;
+  dueAt: string | null;
   completedLessons: number;
   totalLessons: number;
-  completionPct: number; // 0–100 (0 when the course has no lessons)
-  dueAt: string | null;
-  status: ReportStatus;
+  completionPct: number;
+  quizzesTaken: number;
+  quizzesTotal: number;
+  quizScorePct: number | null; // null = no quiz attempts yet
 };
 
-export type CompanyReport = {
-  orgName: string;
-  generatedAt: string; // ISO
-  rows: CompanyReportRow[];
-};
-
-export async function getCompanyReport(orgId: string): Promise<CompanyReport> {
-  const db = createServiceClient();
-  const generatedAt = new Date().toISOString();
-
-  const { data: org } = await db
-    .from("organizations")
-    .select("name")
-    .eq("id", orgId)
-    .single();
-
-  const { data: members } = await db
-    .from("organization_members")
-    .select("id, invited_email, user_id, status")
-    .eq("org_id", orgId);
-  const memberById = new Map((members ?? []).map((m) => [m.id, m]));
-
-  const { data: assignments } = await db
+// Builds the company training report. Relies on the caller's RLS scope: a platform
+// admin sees every org, a company admin only the orgs they administer.
+export async function buildCompanyReport(
+  supabase: SupabaseClient<Database>,
+  orgId: string
+): Promise<CompanyReportRow[]> {
+  const { data: assignments, error: assignmentsError } = await supabase
     .from("course_assignments")
-    .select("member_id, course_id, due_at, courses(title)")
+    .select(
+      "member_id, course_id, due_at, organization_members(user_id, invited_email), courses(title)"
+    )
     .eq("org_id", orgId);
 
-  if (!assignments || assignments.length === 0) {
-    return { orgName: org?.name ?? "", generatedAt, rows: [] };
+  if (assignmentsError) {
+    throw new Error(`Failed to load course assignments: ${assignmentsError.message}`);
   }
+  if (!assignments || assignments.length === 0) return [];
 
-  // Lesson ids per assigned course (courses → modules → lessons).
   const courseIds = [...new Set(assignments.map((a) => a.course_id))];
-  const lessonsByCourse = new Map<string, string[]>(
-    courseIds.map((id) => [id, []])
-  );
-  const { data: modules } = await db
-    .from("modules")
-    .select("course_id, lessons(id)")
-    .in("course_id", courseIds);
-  for (const m of modules ?? []) {
-    const lessons = (m.lessons as { id: string }[] | null) ?? [];
-    const bucket = lessonsByCourse.get(m.course_id);
-    if (bucket) for (const l of lessons) bucket.push(l.id);
-  }
-
-  // Completed lessons per assigned member (by their auth user_id).
   const userIds = [
     ...new Set(
       assignments
-        .map((a) => memberById.get(a.member_id)?.user_id)
-        .filter((id): id is string => Boolean(id))
+        .map(
+          (a) =>
+            (a.organization_members as unknown as { user_id: string | null } | null)
+              ?.user_id
+        )
+        .filter((u): u is string => !!u)
     ),
   ];
-  const allLessonIds = [...new Set([...lessonsByCourse.values()].flat())];
+
+  // course → lessons (via modules)
+  const { data: modules, error: modulesError } = await supabase
+    .from("modules")
+    .select("id, course_id")
+    .in("course_id", courseIds);
+  if (modulesError) throw new Error(`Failed to load modules: ${modulesError.message}`);
+  const moduleIds = (modules ?? []).map((m) => m.id);
+  const moduleToCourse = new Map((modules ?? []).map((m) => [m.id, m.course_id]));
+
+  let lessons: { id: string; module_id: string }[] = [];
+  if (moduleIds.length) {
+    const { data, error } = await supabase
+      .from("lessons")
+      .select("id, module_id")
+      .in("module_id", moduleIds);
+    if (error) throw new Error(`Failed to load lessons: ${error.message}`);
+    lessons = data ?? [];
+  }
+
+  const courseToLessons = new Map<string, string[]>();
+  for (const l of lessons) {
+    const cid = moduleToCourse.get(l.module_id);
+    if (!cid) continue;
+    if (!courseToLessons.has(cid)) courseToLessons.set(cid, []);
+    courseToLessons.get(cid)!.push(l.id);
+  }
+  const allLessonIds = lessons.map((l) => l.id);
+
+  // which lessons carry a quiz
+  const quizLessonSet = new Set<string>();
+  if (allLessonIds.length) {
+    const { data: qq, error: qqError } = await supabase
+      .from("quiz_questions")
+      .select("lesson_id")
+      .in("lesson_id", allLessonIds);
+    if (qqError) throw new Error(`Failed to load quiz questions: ${qqError.message}`);
+    for (const q of qq ?? []) quizLessonSet.add(q.lesson_id);
+  }
+
+  // completed lessons per user
   const completedByUser = new Map<string, Set<string>>();
-  if (userIds.length > 0 && allLessonIds.length > 0) {
-    const { data: progress } = await db
+  if (userIds.length && allLessonIds.length) {
+    const { data: prog, error: progError } = await supabase
       .from("lesson_progress")
       .select("user_id, lesson_id")
-      .eq("completed", true)
       .in("user_id", userIds)
-      .in("lesson_id", allLessonIds);
-    for (const p of progress ?? []) {
-      let set = completedByUser.get(p.user_id);
-      if (!set) {
-        set = new Set();
-        completedByUser.set(p.user_id, set);
-      }
-      set.add(p.lesson_id);
+      .in("lesson_id", allLessonIds)
+      .eq("completed", true);
+    if (progError) throw new Error(`Failed to load lesson progress: ${progError.message}`);
+    for (const p of prog ?? []) {
+      if (!completedByUser.has(p.user_id)) completedByUser.set(p.user_id, new Set());
+      completedByUser.get(p.user_id)!.add(p.lesson_id);
     }
   }
 
-  const now = Date.now();
-  const rows: CompanyReportRow[] = assignments.map((a) => {
-    const member = memberById.get(a.member_id);
-    const courseLessons = lessonsByCourse.get(a.course_id) ?? [];
-    const total = courseLessons.length;
-    const userId = member?.user_id ?? null;
-    const completedSet = userId ? completedByUser.get(userId) : undefined;
-    const completed = completedSet
-      ? courseLessons.filter((id) => completedSet.has(id)).length
-      : 0;
-    const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-    const course = a.courses as unknown as { title: string } | null;
+  // quiz attempts per user → lesson
+  const attemptsByUser = new Map<string, Map<string, { score: number; total: number }>>();
+  if (userIds.length && allLessonIds.length) {
+    const { data: attempts, error: attemptsError } = await supabase
+      .from("quiz_attempts")
+      .select("user_id, lesson_id, score, total")
+      .in("user_id", userIds)
+      .in("lesson_id", allLessonIds);
+    if (attemptsError) throw new Error(`Failed to load quiz attempts: ${attemptsError.message}`);
+    for (const at of attempts ?? []) {
+      if (!attemptsByUser.has(at.user_id)) attemptsByUser.set(at.user_id, new Map());
+      attemptsByUser.get(at.user_id)!.set(at.lesson_id, { score: at.score, total: at.total });
+    }
+  }
 
-    let status: ReportStatus;
-    if (total > 0 && completed === total) status = "completed";
-    else if (a.due_at && new Date(a.due_at).getTime() < now) status = "overdue";
-    else if (completed > 0) status = "in_progress";
-    else status = "not_started";
+  const rows: CompanyReportRow[] = assignments.map((a) => {
+    const member = a.organization_members as unknown as {
+      user_id: string | null;
+      invited_email: string | null;
+    } | null;
+    const course = a.courses as unknown as { title: string } | null;
+    const userId = member?.user_id ?? null;
+
+    const courseLessons = courseToLessons.get(a.course_id) ?? [];
+    const totalLessons = courseLessons.length;
+
+    const userCompleted = userId ? completedByUser.get(userId) : undefined;
+    const completedLessons = courseLessons.filter((lid) => userCompleted?.has(lid)).length;
+    const completionPct =
+      totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+
+    const quizLessons = courseLessons.filter((lid) => quizLessonSet.has(lid));
+    const quizzesTotal = quizLessons.length;
+    const userAttempts = userId ? attemptsByUser.get(userId) : undefined;
+    let sumScore = 0;
+    let sumTotal = 0;
+    let taken = 0;
+    for (const lid of quizLessons) {
+      const at = userAttempts?.get(lid);
+      if (at) {
+        sumScore += at.score;
+        sumTotal += at.total;
+        taken++;
+      }
+    }
+    const quizScorePct = sumTotal > 0 ? Math.round((sumScore / sumTotal) * 100) : null;
 
     return {
-      employeeEmail: member?.invited_email ?? "—",
-      employeeStatus: member?.status ?? "—",
+      email: member?.invited_email ?? "—",
+      userId: userId,
+      courseId: a.course_id,
       courseTitle: course?.title ?? "—",
-      completedLessons: completed,
-      totalLessons: total,
-      completionPct: pct,
       dueAt: a.due_at,
-      status,
+      completedLessons,
+      totalLessons,
+      completionPct,
+      quizzesTaken: taken,
+      quizzesTotal,
+      quizScorePct,
     };
   });
 
   rows.sort(
-    (a, b) =>
-      a.employeeEmail.localeCompare(b.employeeEmail) ||
-      a.courseTitle.localeCompare(b.courseTitle)
+    (x, y) => x.email.localeCompare(y.email) || x.courseTitle.localeCompare(y.courseTitle)
   );
-
-  return { orgName: org?.name ?? "", generatedAt, rows };
+  return rows;
 }
 
-function csvCell(value: string): string {
-  return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+// UTC-stable dd/mm/yyyy — avoids the calendar-day shift that local-timezone
+// formatting causes for timestamps near midnight.
+export function formatDueDate(dueAt: string | null): string {
+  if (!dueAt) return "";
+  const d = new Date(dueAt);
+  const dd = String(d.getUTCDate()).padStart(2, "0");
+  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+  return `${dd}/${mm}/${d.getUTCFullYear()}`;
 }
 
-export function reportToCsv(report: CompanyReport): string {
+// RFC-4180-ish CSV: quote every field, double internal quotes.
+export function reportToCsv(rows: CompanyReportRow[]): string {
   const header = [
     "Employee",
-    "Member status",
     "Course",
-    "Completed lessons",
-    "Total lessons",
+    "Due date",
     "Completion %",
-    "Status",
-    "Deadline",
+    "Lessons completed",
+    "Lessons total",
+    "Quiz score %",
+    "Quizzes taken",
+    "Quizzes total",
   ];
-  const lines = [header.map(csvCell).join(",")];
-  for (const r of report.rows) {
+  const esc = (v: string | number | null) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+
+  const lines = [header.map(esc).join(",")];
+  for (const r of rows) {
     lines.push(
       [
-        r.employeeEmail,
-        r.employeeStatus,
+        r.email,
         r.courseTitle,
-        String(r.completedLessons),
-        String(r.totalLessons),
-        String(r.completionPct),
-        REPORT_STATUS_LABELS[r.status],
-        r.dueAt ? new Date(r.dueAt).toISOString().slice(0, 10) : "",
+        formatDueDate(r.dueAt),
+        r.completionPct,
+        r.completedLessons,
+        r.totalLessons,
+        r.quizScorePct ?? "",
+        r.quizzesTaken,
+        r.quizzesTotal,
       ]
-        .map(csvCell)
+        .map(esc)
         .join(",")
     );
   }

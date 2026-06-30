@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
+import Wordmark from "@/components/brand/Wordmark";
 
 // Only allow same-site absolute paths as a post-login destination — guards against
 // open-redirect via a crafted ?next=//evil.com.
@@ -47,9 +48,12 @@ function LoginForm() {
 
   return (
     <div className="w-full max-w-sm">
-      <div className="bg-n-100 border border-n-200 rounded-md shadow-1 p-8">
+      <div className="flex justify-center mb-6">
+        <Wordmark />
+      </div>
+      <div className="bg-n-0 border border-n-200 rounded-lg shadow-1 p-8">
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-n-900 mt-0">Sign in</h1>
+          <h1 className="text-2xl font-semibold text-n-900 tracking-tight">Sign in</h1>
           <p className="text-sm text-n-400 mt-1">Enter your credentials to continue</p>
         </div>
 

@@ -57,6 +57,24 @@ export async function POST(request: NextRequest) {
     });
   }
 
+  // Persist the attempt (latest result per user+lesson) so the B2B company report
+  // can show quiz scores. Best-effort: a write failure must not break the quiz UX.
+  const { error: attemptError } = await supabase
+    .from("quiz_attempts")
+    .upsert(
+      {
+        user_id: user.id,
+        lesson_id,
+        score: correct,
+        total: questions.length,
+        submitted_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,lesson_id" }
+    );
+  if (attemptError) {
+    console.error("[quiz/submit] failed to record attempt:", attemptError.message);
+  }
+
   return NextResponse.json({
     score: correct,
     total: questions.length,

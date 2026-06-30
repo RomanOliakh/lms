@@ -124,8 +124,8 @@
   --r-xl: 20px;
 
   /* LMS shadows */
-  --sh-1:   0 1px 2px oklch(15% 0.01 80 / 0.04);
-  --sh-2:   0 4px 12px oklch(15% 0.01 80 / 0.06);
+  --sh-1:   0 1px 2px oklch(15% 0.01 80 / 0.05), 0 1px 3px oklch(15% 0.01 80 / 0.04);
+  --sh-2:   0 6px 16px oklch(15% 0.01 80 / 0.08);
   --sh-pop: 0 12px 40px oklch(15% 0.01 80 / 0.12);
 
   /* LMS layout constants */

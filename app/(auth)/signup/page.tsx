@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
+import Wordmark from "@/components/brand/Wordmark";
 
 function safeNext(next: string | null): string | null {
   if (next && next.startsWith("/") && !next.startsWith("//")) return next;
@@ -67,7 +68,10 @@ function SignupForm() {
   if (done) {
     return (
       <div className="w-full max-w-sm">
-        <div className="bg-n-100 border border-n-200 rounded-md shadow-1 p-8 text-center">
+        <div className="flex justify-center mb-6">
+          <Wordmark />
+        </div>
+        <div className="bg-n-0 border border-n-200 rounded-lg shadow-1 p-8 text-center">
           <div className="w-12 h-12 rounded-full bg-lms-accent-50 flex items-center justify-center mx-auto mb-4">
             <span className="text-lms-accent text-xl">✓</span>
           </div>
@@ -92,9 +96,12 @@ function SignupForm() {
 
   return (
     <div className="w-full max-w-sm">
-      <div className="bg-n-100 border border-n-200 rounded-md shadow-1 p-8">
+      <div className="flex justify-center mb-6">
+        <Wordmark />
+      </div>
+      <div className="bg-n-0 border border-n-200 rounded-lg shadow-1 p-8">
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-n-900 mt-0">Sign up</h1>
+          <h1 className="text-2xl font-semibold text-n-900 tracking-tight">Sign up</h1>
           <p className="text-sm text-n-400 mt-1">Create your account</p>
         </div>
 

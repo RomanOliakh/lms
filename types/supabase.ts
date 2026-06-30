@@ -340,6 +340,41 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_attempts: {
+        Row: {
+          id: string
+          lesson_id: string
+          score: number
+          submitted_at: string
+          total: number
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          lesson_id: string
+          score: number
+          submitted_at?: string
+          total: number
+          user_id: string
+        }
+        Update: {
+          id?: string
+          lesson_id?: string
+          score?: number
+          submitted_at?: string
+          total?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quiz_options: {
         Row: {
           id: string

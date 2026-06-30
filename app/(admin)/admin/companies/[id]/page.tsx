@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, BarChart3 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -63,7 +63,16 @@ export default async function EditCompanyPage({
           <ChevronLeft className="w-4 h-4" />
           Back to companies
         </Link>
-        <DeleteCompanyButton organizationId={id} />
+        <div className="flex items-center gap-4">
+          <Link
+            href={`/admin/companies/${id}/report`}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-lms-accent hover:text-lms-accent-600"
+          >
+            <BarChart3 className="w-4 h-4" />
+            Training report
+          </Link>
+          <DeleteCompanyButton organizationId={id} />
+        </div>
       </div>
 
       <h1 className="text-xl font-semibold text-n-900 tracking-tight mb-6">
@@ -145,17 +154,9 @@ export default async function EditCompanyPage({
       <Separator className="my-8 bg-n-200" />
 
       <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-n-700 uppercase tracking-wide">
-            Course assignments
-          </h2>
-          <Link
-            href={`/admin/companies/${id}/report`}
-            className="text-sm font-medium text-lms-accent hover:text-lms-accent-700"
-          >
-            View completion report →
-          </Link>
-        </div>
+        <h2 className="text-sm font-semibold text-n-700 uppercase tracking-wide mb-4">
+          Course assignments
+        </h2>
 
         {assignments && assignments.length > 0 && (
           <div className="border border-n-200 rounded-md overflow-hidden shadow-1 mb-6">

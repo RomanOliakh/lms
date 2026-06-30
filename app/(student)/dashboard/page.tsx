@@ -1,13 +1,23 @@
 import Link from "next/link";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Award, Building2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Progress } from "@/components/ui/progress";
+import ProfileNameForm from "@/components/profile/ProfileNameForm";
+import { getAdminOrg } from "@/lib/company/context";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const adminOrg = await getAdminOrg();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user!.id)
+    .maybeSingle();
 
   const { data: enrollments } = await supabase
     .from("enrollments")
@@ -104,9 +114,24 @@ export default async function DashboardPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
+      {adminOrg && (
+        <Link
+          href="/company"
+          className="flex items-center justify-between gap-3 mb-6 rounded-md border border-lms-accent-100 bg-lms-accent-50 px-4 py-3 hover:bg-lms-accent-100 transition-colors"
+        >
+          <span className="flex items-center gap-2 text-sm text-lms-accent font-medium">
+            <Building2 className="w-4 h-4" />
+            Manage {adminOrg.name} — company workspace
+          </span>
+          <span className="text-lms-accent text-sm">→</span>
+        </Link>
+      )}
       <div className="mb-8">
         <h1 className="text-xl font-semibold text-n-900 tracking-tight">My courses</h1>
         <p className="text-sm text-n-500 mt-0.5">{user?.email}</p>
+        <div className="mt-4">
+          <ProfileNameForm initialName={profile?.full_name ?? ""} />
+        </div>
       </div>
 
       {myCourses.length === 0 ? (
@@ -166,12 +191,23 @@ export default async function DashboardPage() {
                       </span>
                     )}
                   </p>
-                  <Link
-                    href={learnHref}
-                    className="inline-flex items-center px-3 py-1.5 rounded-sm bg-lms-accent text-white text-xs font-semibold hover:bg-lms-accent-600 transition-colors"
-                  >
-                    {pct === 100 ? "Review" : "Continue →"}
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={learnHref}
+                      className="inline-flex items-center px-3 py-1.5 rounded-sm bg-lms-accent text-white text-xs font-semibold hover:bg-lms-accent-600 transition-colors"
+                    >
+                      {pct === 100 ? "Review" : "Continue →"}
+                    </Link>
+                    {pct === 100 && (
+                      <a
+                        href={`/api/certificate?courseId=${courseId}`}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-sm border border-n-200 text-n-700 text-xs font-semibold hover:bg-n-50 transition-colors"
+                      >
+                        <Award className="w-3.5 h-3.5" />
+                        Certificate
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             );

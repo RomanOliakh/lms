@@ -248,6 +248,33 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - Review: 8 CodeRabbit findings (open-redirect server-side, cross-org delete scope, accept race, seat-limit race, PII log + 3 a11y/markup) all addressed in commit `23e1ba4` and threads resolved.
 - ⚠️ NOT yet done: manual browser run of the invite → accept loop; real email send (blocked: `RESEND_API_KEY` empty — link fallback works meanwhile).
 
+### Company report (CSV) ✅ (2026-06-15) — PR #11 MERGED to main
+- Main sellable artifact: per-employee **completion % + quiz scores** across **company-assigned courses only** (not self-enrollments), with **CSV export**.
+- `quiz_attempts` table + RLS (migrations `20260615060000` + `20260615100000` CHECK `total>0`/`0≤score≤total`). Scores were never persisted before — `/api/quiz/submit` now upserts the latest attempt per `(user_id, lesson_id)`. RLS: learner own (`qa_self_all`) / platform admin all / company admin reads members' attempts via private helper `org_admin_member_user_ids()`.
+- `lib/reports/company-report.ts` (shared aggregation + CSV builder, UTC dates, surfaces query errors), report page `/admin/companies/[id]/report` (table + Download CSV + per-row certificate link), export route `app/api/companies/[id]/report/export` (RLS-scoped, 403/500 split).
+- 6 CodeRabbit findings addressed (route under `app/api/**`, `submitted_at` on upsert, error surfacing, UTC dates, CHECK constraints, 500-vs-403) — all threads resolved.
+- **Live RLS test passed (2026-06-15)**: one seeded attempt per org → company-admin of A sees only A's (`total_visible=1`, `sees_orgB=0`); run as `set local role authenticated` + jwt (no CTE phantom-leak), inside `begin/rollback` (no leftover rows). Executed from **local Claude Code + Supabase MCP** — web-session Supabase MCP writes/reads are approval-gated and can't run from the cloud session.
+
+### PDF completion certificate ✅ (2026-06-15) — PR #12 MERGED to main
+- Learners download a PDF certificate for any course completed 100%; platform/company admins issue it for employees from the report. `GET /api/certificate?courseId=&userId=` (node runtime, `@react-pdf/renderer`): authorizes self / platform admin / company admin **scoped to an active assignment of that course** (CodeRabbit fix), verifies 100% completion, streams PDF.
+- `lib/certificate/{document.tsx,data.ts}` (service-role reads so an admin can issue for an employee; fail-closed on query errors). Name = `profiles.full_name` (column pre-existed since sprint 1 — no migration) editable on the learner dashboard (`updateProfileName`, upsert). Certificate links on dashboard (100% cards) + report rows.
+- 5 CodeRabbit findings addressed (1 Critical: profile upsert; delegation scope; fail-closed cert data; saved-state) — threads resolved.
+- ⚠️ NOT yet done: runtime PDF render check in browser.
+
+### Company Admin portal ✅ (2026-06-15) — PR #14 MERGED to main
+- Closes the biggest value-loop gap: B2B admin was platform-admin-only. `company_admin`/`owner` now get a scoped **`/company`** workspace (dashboard, employees invite/revoke, assignments, report+CSV+certificates), data scoped to their org by existing RLS.
+- `proxy.ts` gates `/company` to an active admin membership; `(company)` route group + `CompanySidebar` + `getAdminOrg()` resolver (first admin org — multi-org switcher is a follow-up per P0 #2); reuses existing Invite/Assign/Report components; learner dashboard shows a "company workspace" link for admins.
+- 5 CodeRabbit findings (error-handling, least-privilege select, drop UUID-as-email, 4px spacing) fixed; accent-token finding skipped with rationale (repo uses `lms-accent` utilities, no `a-*` utilities exist).
+- ⚠️ NOT yet done: browser run as a company_admin (make roman a company_admin of a test org via SQL).
+
+### Production deploy ✅ (2026-06-15) — Vercel
+- Live & public: **https://lms-two-gules.vercel.app** (login renders in incognito; Vercel Deployment Protection disabled so clients can access). Env set on Vercel (Supabase URL/anon/service-role, `NEXT_PUBLIC_APP_URL`). Build clean on Vercel.
+- ⚠️ Pending: Supabase Auth → URL Configuration must add Site URL + `https://lms-two-gules.vercel.app/**` so signup-confirm / invite-accept redirects work in prod; then prod smoke test.
+
+### Discovery P0 + pricing + scope ✅ (2026-06-15) — PR #13 MERGED to main
+- Partner answered all 5 P0: content = shared catalog authored by us (companies buy, don't author → future company↔course entitlements); one email may belong to several companies (schema already supports); manual per-company seat-based billing (`docs/pricing.md`, optimized from partner's CAD strategy); roles = platform_admin / company_admin / learner only; B2B-first, no migration.
+- `docs/discovery-questions.md` (answers), `docs/pricing.md` (trimmed), `docs/scope-v1.md` (50 flows → ✅ Built / 🟡 v1 / ⛔ Later).
+
 ## Current sprint
 **B2B pivot in progress** (see Product scope above). Sprints 1–3 (B2C) ✅ done and verified 2026-06-07. **Phase 0 (tenancy) + company provisioning UI ✅ MERGED to main 2026-06-11** (PR #6: browser-verified, RLS isolation test passed, two code reviews — Claude + CodeRabbit — all findings addressed; follow-up migration `20260611150000` adds membership identity constraints).
 UI translated to English ✅ MERGED to main 2026-06-12 (`feat/english-ui`, PR #8): all user-visible strings in `app/**`, `components/**`, `lib/actions/**` + `<html lang="en">`; verified by Cyrillic-grep (0 matches), `tsc --noEmit`, and dev-server render of /login + /courses. DB course content stays as is; `lib/utils.ts` transliteration map untouched (functional). Platform is English-first with English content; docs stay as-is for now.
@@ -256,13 +283,16 @@ Dev environment fully configured: `.env.local` has all Supabase + Stripe keys se
 Notion status page: https://www.notion.so/366fbb2a781f81ff929ae0472e66fb08
 
 ### Next tasks
-- Employee invitations (PR #10) + course assignments (PR #9) ✅ **MERGED to main 2026-06-14**
-- Company report: per-employee completion % + CSV export ✅ built 2026-06-30 (`lib/reports/company-report.ts`, `/admin/companies/[id]/report` + `/export` route, "View completion report" link on company page). Platform-admin only (under `/admin` proxy gate); reads via service-role client (RLS blocks cross-user `lesson_progress`), scoped to the org. Status = completed/in_progress/not_started/overdue; CSV has UTF-8 BOM for Excel. SQL-validated against seeded data incl. a duplicate-course-title trap (logic keys on `course_id`, not title). ⚠️ **Quiz scores NOT included** — `api/quiz/submit` never persists results and there's no `quiz_attempts` table; needs persistence layer first (would only capture future attempts). Not browser-verified yet (needs admin session + assigned course with progress).
-- PDF completion certificate (v1 IN scope) — not started
-- Bunny signed video URLs (blocked: Bunny credentials)
-- Awaiting partner answers to `docs/discovery-questions.md` (P0 blocks deeper data-model decisions)
-- Roadmap board: GitHub Project #3 — keep statuses updated as phases land
-- **Manual follow-ups (can't be automated from web sessions):** (1) move the «Employee invitations» + «Course assignments» cards on GitHub Project #3 to Done by hand — no `gh`/Projects MCP in web env; (2) set `RESEND_API_KEY` + verified sender to enable real invite emails
+- ✅ MERGED to main: invitations (PR #10) + assignments (PR #9) [06-14]; company report (PR #11), **PDF certificate (PR #12)**, **Company Admin portal (PR #14)**, discovery+pricing+scope docs (PR #13) [06-15].
+- ✅ **Deployed to Vercel** (06-15): https://lms-two-gules.vercel.app (public).
+- 🟡 **Design refresh A** — **PR #15 open** (`feat/design-refresh-a`, not merged): brand Wordmark + refined auth + shadow tokens; first pass, dashboards/tables can follow. Review/merge.
+- **To finish the demo (next session):**
+  1. Supabase Auth → URL Configuration: add Site URL + `https://lms-two-gules.vercel.app/**` (prod signup-confirm / invite-accept).
+  2. Prod smoke test: signup→confirm, `/admin`, `/company` (make roman a `company_admin` of a test org via SQL to test the portal).
+  3. Review/merge PR #15; decide whether to roll the polish across dashboards/admin/portal.
+  4. Demo content: a real course (text lessons — video blocked) + demo company + assignments + some progress.
+- **v1 IN scope feature-complete**, except Bunny video (blocked: Bunny creds) + real invite email (blocked: `RESEND_API_KEY`).
+- **Manual follow-ups (can't be automated from web sessions):** (1) GitHub Project #3 — set «Phase 1: Basic certificates» → Done (cert merged); cards «Invitations/Assignments/Company report» already moved; (2) `RESEND_API_KEY` + verified sender; (3) Bunny credentials.
 
 ## Verification checklist
 
