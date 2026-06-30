@@ -94,7 +94,7 @@ function SignupForm() {
     <div className="w-full max-w-sm">
       <div className="bg-n-100 border border-n-200 rounded-md shadow-1 p-8">
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-n-900">Sign up</h1>
+          <h1 className="text-xl font-semibold text-n-900 mt-0">Sign up</h1>
           <p className="text-sm text-n-400 mt-1">Create your account</p>
         </div>
 

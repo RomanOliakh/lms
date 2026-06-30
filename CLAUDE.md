@@ -257,7 +257,7 @@ Notion status page: https://www.notion.so/366fbb2a781f81ff929ae0472e66fb08
 
 ### Next tasks
 - Employee invitations (PR #10) + course assignments (PR #9) ✅ **MERGED to main 2026-06-14**
-- Company report: per-employee completion % + quiz scores, CSV export (main sellable artifact — now unblocked by assignments) — next up, not started
+- Company report: per-employee completion % + CSV export ✅ built 2026-06-30 (`lib/reports/company-report.ts`, `/admin/companies/[id]/report` + `/export` route, "View completion report" link on company page). Platform-admin only (under `/admin` proxy gate); reads via service-role client (RLS blocks cross-user `lesson_progress`), scoped to the org. Status = completed/in_progress/not_started/overdue; CSV has UTF-8 BOM for Excel. SQL-validated against seeded data incl. a duplicate-course-title trap (logic keys on `course_id`, not title). ⚠️ **Quiz scores NOT included** — `api/quiz/submit` never persists results and there's no `quiz_attempts` table; needs persistence layer first (would only capture future attempts). Not browser-verified yet (needs admin session + assigned course with progress).
 - PDF completion certificate (v1 IN scope) — not started
 - Bunny signed video URLs (blocked: Bunny credentials)
 - Awaiting partner answers to `docs/discovery-questions.md` (P0 blocks deeper data-model decisions)
