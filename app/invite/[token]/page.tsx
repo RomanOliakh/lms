@@ -38,7 +38,7 @@ export default async function InvitePage({
   if (!invite) {
     return (
       <Shell>
-        <h1 className="text-xl font-semibold text-n-900">Invitation not found</h1>
+        <h1 className="text-xl font-semibold text-n-900 mt-0">Invitation not found</h1>
         <p className="text-sm text-n-500 mt-2">
           This invitation link is invalid or has already been used. Ask your administrator
           to send a new one.
@@ -50,7 +50,7 @@ export default async function InvitePage({
   if (invite.status === "active") {
     return (
       <Shell>
-        <h1 className="text-xl font-semibold text-n-900">Already accepted</h1>
+        <h1 className="text-xl font-semibold text-n-900 mt-0">Already accepted</h1>
         <p className="text-sm text-n-500 mt-2">This invitation has already been accepted.</p>
         <Link
           href="/dashboard"
@@ -67,7 +67,7 @@ export default async function InvitePage({
   if (expired) {
     return (
       <Shell>
-        <h1 className="text-xl font-semibold text-n-900">Invitation expired</h1>
+        <h1 className="text-xl font-semibold text-n-900 mt-0">Invitation expired</h1>
         <p className="text-sm text-n-500 mt-2">
           This invitation has expired. Ask your administrator to resend it.
         </p>
@@ -86,7 +86,7 @@ export default async function InvitePage({
   if (!user) {
     return (
       <Shell>
-        <h1 className="text-xl font-semibold text-n-900">
+        <h1 className="text-xl font-semibold text-n-900 mt-0">
           Join {companyName}
         </h1>
         <p className="text-sm text-n-500 mt-2">
@@ -116,7 +116,7 @@ export default async function InvitePage({
   if ((invite.invited_email ?? "").toLowerCase() !== (user.email ?? "").toLowerCase()) {
     return (
       <Shell>
-        <h1 className="text-xl font-semibold text-n-900">Wrong account</h1>
+        <h1 className="text-xl font-semibold text-n-900 mt-0">Wrong account</h1>
         <p className="text-sm text-n-500 mt-2">
           This invitation was sent to{" "}
           <span className="font-medium text-n-700">{invite.invited_email}</span>, but
@@ -131,7 +131,7 @@ export default async function InvitePage({
   // Signed in with the matching email → ready to accept.
   return (
     <Shell>
-      <h1 className="text-xl font-semibold text-n-900">Join {companyName}</h1>
+      <h1 className="text-xl font-semibold text-n-900 mt-0">Join {companyName}</h1>
       <p className="text-sm text-n-500 mt-2 mb-6">
         You&apos;re signed in as{" "}
         <span className="font-medium text-n-700">{user.email}</span>. Accept to join and
