@@ -110,7 +110,7 @@ BUNNY_API_KEY=
 BUNNY_LIBRARY_ID=
 BUNNY_CDN_HOSTNAME=
 RESEND_API_KEY=
-NEXT_PUBLIC_APP_URL=http://localhost:3001
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 ## Important conventions
@@ -217,8 +217,8 @@ NEXT_PUBLIC_APP_URL=http://localhost:3001
 - `npm run build` — no errors
 
 ### Known gotchas — Sprint 3
-- Stripe env vars must be filled in `.env.local`; `NEXT_PUBLIC_APP_URL` must match dev port (3001)
-- For local Stripe webhook testing: `stripe listen --forward-to localhost:3001/api/webhooks/stripe`
+- Stripe env vars must be filled in `.env.local`; `NEXT_PUBLIC_APP_URL` must match dev port (3000)
+- For local Stripe webhook testing: `stripe listen --forward-to localhost:3000/api/webhooks/stripe`
 - `?enrolled=true` after Stripe redirect is optimistic — webhook may not have fired yet; page re-renders normally on next visit
 - `quiz_options.is_correct` is readable via anon key (RLS can't restrict columns) — server never selects it for client queries
 
@@ -252,7 +252,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3001
 **B2B pivot in progress** (see Product scope above). Sprints 1–3 (B2C) ✅ done and verified 2026-06-07. **Phase 0 (tenancy) + company provisioning UI ✅ MERGED to main 2026-06-11** (PR #6: browser-verified, RLS isolation test passed, two code reviews — Claude + CodeRabbit — all findings addressed; follow-up migration `20260611150000` adds membership identity constraints).
 UI translated to English ✅ MERGED to main 2026-06-12 (`feat/english-ui`, PR #8): all user-visible strings in `app/**`, `components/**`, `lib/actions/**` + `<html lang="en">`; verified by Cyrillic-grep (0 matches), `tsc --noEmit`, and dev-server render of /login + /courses. DB course content stays as is; `lib/utils.ts` transliteration map untouched (functional). Platform is English-first with English content; docs stay as-is for now.
 **Course assignments** built 2026-06-12 (`feat/course-assignments`): `course_assignments` table (org_id + member_id + course_id, optional `due_at`; composite FK (member_id, org_id) → organization_members guarantees member belongs to org) + RLS (platform admin all / company_admin own org / learner reads own via new `private.current_user_member_ids()`); migration `20260612190000`, applied via MCP, types regenerated. Assign/unassign UI on `/admin/companies/[id]` (course select + employee checkboxes + optional deadline; idempotent upsert), learner dashboard shows assigned courses with "Assigned" badge + due date (overdue in red), `/learn/*` access granted by assignment OR enrollment. **Live RLS test passed** (learner B sees own = 1; admin A sees org B = 0; cross-org insert → 42501; own-org insert OK). **Browser-verified 2026-06-12**: assign with/without deadline → row in table + «Course assigned ✓», unassign with confirm, learner dashboard shows ASSIGNED badge + due date + progress, `/learn/*` opens WITHOUT enrollment via assignment, mark-complete → 100% on dashboard (test progress reverted; assignment Ai Test Course → learner B left in DB). Learner login for testing: admin-API magic link → session cookie (no password needed); /login does NOT pick up implicit-flow hash tokens — known gap, same as password reset.
-Dev environment fully configured: `.env.local` has all Supabase + Stripe keys set. Dev server runs on port 3001. Supabase Site URL set to :3001. Stripe account business name set ("LMS Test", test mode). `BUNNY_*` and `RESEND_API_KEY` are **empty** — v1 blockers.
+Dev environment fully configured: `.env.local` has all Supabase + Stripe keys set. **Standardized on port 3000** (2026-06-30, matches Ship Studio): `NEXT_PUBLIC_APP_URL=http://localhost:3000`, default `npm run dev` → 3000. ⚠️ Supabase Site URL + redirect allow-list must be set to `http://localhost:3000` in the dashboard (auth-email / invite / Stripe-return links break otherwise). Stripe account business name set ("LMS Test", test mode). `BUNNY_*` and `RESEND_API_KEY` are **empty** — v1 blockers.
 Notion status page: https://www.notion.so/366fbb2a781f81ff929ae0472e66fb08
 
 ### Next tasks

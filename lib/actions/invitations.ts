@@ -11,7 +11,7 @@ type InvitableRole = (typeof INVITABLE_ROLES)[number];
 const TOKEN_TTL_MS = 72 * 60 * 60 * 1000; // 72 hours
 
 function appUrl(): string {
-  return (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001").replace(/\/+$/, "");
+  return (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/+$/, "");
 }
 
 function friendlyDbError(error: { code?: string; message: string }): string {
